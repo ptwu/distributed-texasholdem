@@ -1,0 +1,13 @@
+{
+  "name": "distributed-texasholdem",
+  "version": "1.0.0",
+  "description": "distributed texas hold 'em poker made using socket.io, Node, and express",
+  "main": "index.js",
+  "repository": "https://github.com/ptwu/distributed-texasholdem.git",
+  "author": "Peter Wu <peterlingwu@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
