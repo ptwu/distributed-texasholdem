@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+
+<head>
+	<style>
+		#header div {
+			/* float: left; */
+			margin-left: 10px;
+		}
+
+		#divFinalWinner {
+			font-size: 5em;
+			text-align: center;
+			color: blue;
+		}
+
+		.card {
+			float: left;
+			border: 5px solid black;
+			border-radius: 5px;
+			padding: 10px;
+			margin: 8px;
+			cursor: pointer;
+			font-size: 5em;
+		}
+
+		.selected {
+			background: grey;
+			border: 2px solid red;
+		}
+
+		#divStart {
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div>
+		<div id="header">
+			<div id="divPlayersCount">
+				Player count: <span id="playerCount">0</span>
+			</div>
+			<div id="infoPlayers">
+				Players name:
+				<div id="playersNames">
+
+				</div>
+			</div>
+			<div id="infoRoom">
+				Room #:
+				<div id="roomIndex">
+
+				</div>
+			</div>
+		</div>
+
+		<div id="gameBoard">
+			<div id="divStart">
+				Enter your name: <br />
+
+				<input type="text" id="username" />
+				<input type="button" onclick="startGame()" value="Start game">
+			</div>
+
+			My cards:
+			<div id="mycards">
+
+			</div>
+
+			<div id="divWinner">
+
+			</div>
+
+			<div id="divFinalWinner">
+
+			</div>
+		</div>
+
+	</div>
+
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.min.js"></script>
+	<script src="scripts/main.js"> </script>
+
+	<script>
+		const socket = io('http://localhost:3000');
+		const gameInfo = null;
+
+		socket.on("dealt", function (data) {
+			$('#divStart').hide();
+			$('#mycards').html();
+			$('#mycards').html(data.cards.map(function (c, i) { return renderCard(c, i); }));
+		});
+
+		socket.on("startGame", function (data) {
+			$('#playersNames').html(data.players.map(function (p) {
+				return '<div class="player">' + p + '</div>';
+			}));
+		});
+
+		socket.on("gameInfo", function (info) {
+			console.log(info);
+			gameInfo = info;
+
+			$('#playerCount').html(gameInfo.players);
+			$('#roomIndex').html(gameInfo.roomIndex);
+		});
+
+		socket.on("turnResult", function (data) {
+			$('#divWinner').html('Last turn winner: ' + data.winner + "!!!");
+		});
+
+		socket.on("gameEnded", function (data) {
+			$('#divFinalWinner').html('Final winner: ' + data.winner + "!!!");
+		});
+
+		// .... socket.on(...)
+
+		var startGame = function () {
+			console.log(socket);
+			var username = $('#username').val();
+
+			console.log(username);
+			socket.emit('join', { username: username });
+		}
+
+	</script>
+
+</body>
+
+</html>

@@ -6,8 +6,14 @@
   "repository": "https://github.com/ptwu/distributed-texasholdem.git",
   "author": "Peter Wu <peterlingwu@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "nodemon ./src/app.js"
+  },
   "dependencies": {
     "express": "^4.17.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "cluster": "^0.7.7",
+    "nodemon": "^1.11.0",
+    "jshint": "^2.9.3"
   }
 }
