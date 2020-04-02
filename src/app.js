@@ -74,27 +74,4 @@ io.on('connection', (socket) => {
 	socket.on('disconnect', () => console.log('disconnect'));
 });
 
-// app.get('/rooms', function (req, res) {
-// 	var content = '';
-// 	content += '<h1>Latest Rooms</h1>';
-// 	content += '<ul>';
-
-// 	for (var i = rooms.length - 1; i >= 0; i--) {
-// 		content += '<li>Num. players: ' + rooms[i].getNumPlayers() + '; Status: ' + rooms[i].status + '</li>';
-// 	}
-// 	content += '</ul>';
-
-// 	res.send(content);
-// });
-
-// app.get('/rooms/:id', function (req, res) {
-// 	if (typeof rooms[req.params.id] != 'undefined') {
-// 		const game = rooms[req.params.id];
-// 		res.send('Num. players: ' + game.getNumPlayers() + '; Status: ' + game.status);
-// 	} else {
-// 		res.send('Error: this room does not exist.');
-// 	}
-
-// });
-
 server.listen(3000);
