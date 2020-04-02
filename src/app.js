@@ -39,6 +39,15 @@ io.on('connection', (socket) => {
 		}
 	});
 
+	socket.on('startGame', (data) => {
+		let game = rooms.find(r => r.getCode() === data.code);
+		if (game == undefined) {
+			socket.emit('gameBegin', undefined);
+		} else {
+
+		}
+	});
+
 	socket.on('sendCard', (payload) => {
 		console.log(payload);
 		var game = rooms[payload.gameInfo.roomIndex];

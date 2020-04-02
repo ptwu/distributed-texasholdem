@@ -93,7 +93,7 @@
 				$('#playersNames').html(data.players.map(function (p) {
 					return '<span>' + p + '</span><br />';
 				}));
-				$('#startGameArea').html('<button onclick=startGame() type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat" >Start Game</button >');
+				$('#startGameArea').html('<br /><button onclick=startGame(' + data.code + ') type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat">Start Game</button >');
 			} else {
 				$('#hostModalContent').html('<h5>Code:</h5><code>' + data.code + '</code><br /><h5>Players Currently in My Room</h5>');
 				$('#playersNames').html(data.players.map(function (p) {
@@ -114,8 +114,12 @@
 			}
 		});
 
-		socket.on("gameEnded", function (data) {
-			$('#divFinalWinner').html('Final winner: ' + data.winner + "!!!");
+		socket.on("gameBegin", function (data) {
+			if (data == undefined) {
+				alert('Error - invalid game.');
+			}
+			$('#hostModal').closeModal();
+			$('#joinModal').closeModal();
 		});
 
 		var beginHost = function () {
@@ -133,12 +137,9 @@
 				socket.emit('join', { code: $('#code-field').val(), username: $('#joinName-field').val() });
 			}
 		}
-		var startGame = function () {
-			console.log(socket);
-			var username = $('#username').val();
 
-			console.log(username);
-			socket.emit('join', { username: username });
+		var startGame = function (gameCode) {
+			socket.emit('startGame', { code: gameCode });
 		}
 
 		$(document).ready(function () {
