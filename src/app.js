@@ -15,25 +15,28 @@ let rooms = [];
 
 io.on('connection', (socket) => {
 	console.log('new connection ', socket.id);
-	socket.on('join', (data) => {
-		let game;
-
-		if (rooms.length === 0 || !rooms[rooms.length - 1].isWaiting()) {
-			game = new Game();
-			rooms.push(game);
+	socket.on('host', (data) => {
+		if (data.username == "") {
+			socket.emit('hostRoom', undefined);
 		} else {
-			game = rooms[rooms.length - 1];
+			const code = "" + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10)
+			let game = new Game(code, data.username);
+			rooms.push(game);
+			game.addPlayer(data.username, socket);
+			game.emitPlayers('hostRoom', { 'code': code, 'players': game.getPlayersArray() });
 		}
+	});
 
-		game.addPlayer(data.username, socket);
-
-		game.emitPlayers('gameInfo', { 'roomIndex': rooms.length - 1, 'players': game.getNumPlayers() });
-
-		if (game.getNumPlayers() == 2) {
-			game.startGame();
-			game.emitPlayers('gameInfo', { 'roomIndex': rooms.length - 1, 'players': game.getNumPlayers() });
+	socket.on('join', (data) => {
+		let game = rooms.find(r => r.getCode() === data.code);
+		if (game == undefined || data.username == undefined) {
+			socket.emit('joinRoom', undefined);
+		} else {
+			game.addPlayer(data.username, socket);
+			rooms = rooms.map(r => (r.getCode() === data.code) ? game : r);
+			game.emitPlayers('joinRoom', { 'host': game.getHostName(), 'players': game.getPlayersArray() });
+			game.emitPlayers('hostRoom', { 'code': data.code, 'players': game.getPlayersArray() })
 		}
-
 	});
 
 	socket.on('sendCard', (payload) => {
@@ -62,30 +65,27 @@ io.on('connection', (socket) => {
 	socket.on('disconnect', () => console.log('disconnect'));
 });
 
+// app.get('/rooms', function (req, res) {
+// 	var content = '';
+// 	content += '<h1>Latest Rooms</h1>';
+// 	content += '<ul>';
 
+// 	for (var i = rooms.length - 1; i >= 0; i--) {
+// 		content += '<li>Num. players: ' + rooms[i].getNumPlayers() + '; Status: ' + rooms[i].status + '</li>';
+// 	}
+// 	content += '</ul>';
 
-app.get('/rooms', function (req, res) {
-	var content = '';
-	content += '<h1>Latest Rooms</h1>';
-	content += '<ul>';
+// 	res.send(content);
+// });
 
-	for (var i = rooms.length - 1; i >= 0; i--) {
-		content += '<li>Num. players: ' + rooms[i].getNumPlayers() + '; Status: ' + rooms[i].status + '</li>';
-	}
-	content += '</ul>';
+// app.get('/rooms/:id', function (req, res) {
+// 	if (typeof rooms[req.params.id] != 'undefined') {
+// 		const game = rooms[req.params.id];
+// 		res.send('Num. players: ' + game.getNumPlayers() + '; Status: ' + game.status);
+// 	} else {
+// 		res.send('Error: this room does not exist.');
+// 	}
 
-	res.send(content);
-});
-
-
-app.get('/rooms/:id', function (req, res) {
-	if (typeof rooms[req.params.id] != 'undefined') {
-		const game = rooms[req.params.id];
-		res.send('Num. players: ' + game.getNumPlayers() + '; Status: ' + game.status);
-	} else {
-		res.send('Error: this room does not exist.');
-	}
-
-});
+// });
 
 server.listen(3000);

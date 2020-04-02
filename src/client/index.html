@@ -3,146 +3,136 @@
 
 <head>
 	<link href="css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
-	<style>
-		#header div {
-			/* float: left; */
-			margin-left: 10px;
-		}
-
-		#divFinalWinner {
-			font-size: 5em;
-			text-align: center;
-			color: blue;
-		}
-
-		.playingCard {
-			float: left;
-			border: 5px solid black;
-			background-color: white;
-			border-radius: 5px;
-			height: 150px;
-			width: 100px;
-			color: black;
-			padding: 5px;
-			margin: 8px;
-			cursor: pointer;
-			font-size: 3em;
-		}
-
-		.blankCard {
-			float: left;
-			background-color: blue;
-			border: 5px solid black;
-			border-radius: 5px;
-			height: 84px;
-			width: 60px;
-			padding: 10px;
-			margin: 8px;
-			cursor: pointer;
-			font-size: 5em;
-		}
-
-		.selected {
-			background: grey;
-			border: 2px solid red;
-		}
-
-		#divStart {
-			text-align: center;
-		}
-	</style>
+	<link href="css/index.css" type="text/css" rel="stylesheet" media="screen,projection" />
 </head>
 
 <body>
-	<div>
-		<div id="header">
-			<div id="divPlayersCount">
-				Player count: <span id="playerCount">0</span>
-			</div>
-			<div id="infoPlayers">
-				Player names:
-				<div id="playersNames"></div>
-			</div>
-			<div id="infoRoom">
-				Room #:
-				<div id="roomIndex">
-
+	<div class="valign-wrapper row login-box">
+		<div class="col card hoverable s12 m4">
+			<form>
+				<div class="card-content">
+					<span class="card-title black-text">Texas Hold &apos;Em Poker - Distributed</span>
+					<p>Welcome to Texas Hold &apos;Em Poker!</p>
 				</div>
-			</div>
-		</div>
-
-		<div id="gameBoard">
-			<div id="divStart">
-				Enter your name: <br />
-
-				<input type="text" id="username" />
-				<input type="button" onclick="startGame()" value="Start game">
-			</div>
-
-			<div class="row">
-				<div class="col s12 m6">
-					<div class="card green darken-2">
-						<div class="card-content white-text">
-							<span class="card-title">My Cards</span>
-							<div id="mycards"></div>
-						</div>
-						<div class="card-action">
-							<button class="btn white black-text">Fold</button>
-							<button class="btn white black-text">Call</button>
-							<button class="btn white black-text">Raise</button>
-						</div>
-					</div>
+				<div class="card-action right-align">
+					<a class="btn-large waves-effect waves-light indigo darken-3 white-text modal-trigger" href="#hostModal">Host
+						Game</a>
+					<a class="btn-large waves-effect waves-light indigo darken-3 white-text modal-trigger" href="#joinModal">Join
+						Game</a>
 				</div>
-			</div>
-			<div class="row">
-				<div id="opponentCards"></div>
-			</div>
-			<div id="divWinner"></div>
-
-			<div id="divFinalWinner"></div>
+			</form>
 		</div>
-
 	</div>
+
+	<div id="hostModal" class="modal">
+		<div class="modal-content">
+			<h4>Host Game</h4>
+			<div id="hostModalContent">
+				<p>Enter your name, and then we'll give you a code which you can give to your friends as the host.</p>
+				<div class="input-field col s12">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="hostName-field" required />
+				</div>
+				<button onclick=beginHost() type="submit"
+					class="waves-effect waves-light indigo darken-3 white-text btn-flat">Get
+					Code</button>
+			</div>
+			<div id="playersNames"></div>
+			<div id="startGameArea"></div>
+		</div>
+		<div class="modal-footer">
+			<a class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
+		</div>
+	</div>
+	</div>
+
+	<div id="joinModal" class="modal">
+		<div class="modal-content">
+			<h4>Join Game</h4>
+			<div id="joinModalContent">
+				<p>Enter the your name and the code provided by the host to join their room:</p>
+				<div class="input-field col s12">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="joinName-field" required="required" />
+				</div>
+				<div class="input-field col s12">
+					<label for="code">Code</label>
+					<input type="text" name="code" id="code-field" required="required" />
+				</div>
+				<button onclick=joinRoom() type="submit"
+					class="waves-effect waves-light indigo darken-3 white-text btn-flat">Join
+					Game</button>
+			</div>
+			<div id="playersNamesJoined"></div>
+		</div>
+		<div class="modal-footer">
+			<a href="#!" class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
+		</div>
+	</div>
+	<footer class="page-footer white">
+		<div class="container footer-c">
+			<b>© 2020 - Peter Wu.</b><br><br>
+	</footer>
 
 	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.min.js"></script>
 	<script src="js/main.js"> </script>
 	<script src="js/materialize.min.js"></script>
 	<script>
-		const socket = io('http://localhost:3000');
-		let gameInfo = null;
+		var socket = io('http://localhost:3000');
+		var gameInfo = null;
 
-		socket.on("dealt", function (data) {
-			$('#divStart').hide();
-			$('#mycards').html();
-			$('#mycards').html(data.cards.map(function (c, i) { return renderCard(c, i); }));
-			$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p); }));
+		socket.on("hostRoom", function (data) {
+			if (data.players.length >= 11) {
+				$('#hostModalContent').html('<h5>Code:</h5><code>' + data.code + '</code><br /><h5>Warning: you have too many players in your room. Max is 11.</h5><h5>Players Currently in My Room</h5>');
+				$('#playersNames').html(data.players.map(function (p) {
+					return '<span>' + p + '</span><br />';
+				}));
+			} else if (data.players.length > 1) {
+				$('#hostModalContent').html('<h5>Code:</h5><code>' + data.code + '</code><br /><h5>Players Currently in My Room</h5>');
+				$('#playersNames').html(data.players.map(function (p) {
+					return '<span>' + p + '</span><br />';
+				}));
+				$('#startGameArea').html('<button onclick=startGame() type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat" >Start Game</button >');
+			} else {
+				$('#hostModalContent').html('<h5>Code:</h5><code>' + data.code + '</code><br /><h5>Players Currently in My Room</h5>');
+				$('#playersNames').html(data.players.map(function (p) {
+					return '<span>' + p + '</span><br />';
+				}));
+			}
+
 		});
 
-		socket.on("startGame", function (data) {
-			$('#playersNames').html(data.players.map(function (p) {
-				return '<div class="player">' + p + '</div>';
-			}));
-		});
-
-		socket.on("gameInfo", function (info) {
-			console.log(info);
-			gameInfo = info;
-
-			$('#playerCount').html(gameInfo.players);
-			$('#roomIndex').html(gameInfo.roomIndex);
-		});
-
-		socket.on("turnResult", function (data) {
-			$('#divWinner').html('Last turn winner: ' + data.winner + "!!!");
+		socket.on("joinRoom", function (data) {
+			if (data == undefined) {
+				alert('Invalid code! Not sure if that room exists.');
+			} else {
+				$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game.</p>');
+				$('#playersNamesJoined').html(data.players.map(function (p) {
+					return '<span>' + p + '</span><br />';
+				}));
+			}
 		});
 
 		socket.on("gameEnded", function (data) {
 			$('#divFinalWinner').html('Final winner: ' + data.winner + "!!!");
 		});
 
-		// .... socket.on(...)
+		var beginHost = function () {
+			if ($('#hostName-field').val() == "") {
+				alert('Enter a valid name!');
+			} else {
+				socket.emit('host', { username: $('#hostName-field').val() });
+			}
+		}
 
+		var joinRoom = function () {
+			if ($('#joinName-field').val() == "" || $('#code-field').val() == "") {
+				alert('Enter a valid name/code!');
+			} else {
+				socket.emit('join', { code: $('#code-field').val(), username: $('#joinName-field').val() });
+			}
+		}
 		var startGame = function () {
 			console.log(socket);
 			var username = $('#username').val();
@@ -150,6 +140,10 @@
 			console.log(username);
 			socket.emit('join', { username: username });
 		}
+
+		$(document).ready(function () {
+			$('.modal-trigger').leanModal();
+		});
 
 	</script>
 

@@ -2,18 +2,25 @@ const Deck = require('./deck.js');
 const Player = require('./player.js');
 const Card = require('./card.js');
 
-const Game = function (numCards) {
+const Game = function (name, host) {
 	this.deck = new Deck();
+	this.host = host;
 	this.players = [];
-	this.community = [];
 	this.status = 0;
 	this.cardsPerPlayer = 2;
 	this.currentlyPlayed = 0;
 	this.gameWinner = null;
+	this.gameName = name;
 
 	this.setCardsPerPlayer = (numCards) => {
 		this.cardsPerPlayer = numCards;
 	};
+
+	this.getHostName = () => { return this.host; };
+
+	this.getPlayersArray = () => { return this.players.map(function (p) { return p.getUsername(); }) };
+
+	this.getCode = () => { return this.gameName; };
 
 	this.addPlayer = (playerName, socket) => {
 		this.players.push(new Player(playerName, socket));
@@ -104,8 +111,6 @@ const Game = function (numCards) {
 	};
 
 	this.emitPlayers = function (eventName, payload) {
-		// console.log("Emit:", eventName, payload);
-
 		for (var pn = 0; pn < this.getNumPlayers(); pn++) {
 			// console.log("Emit p" + pn + " (Socket: " + this.players[pn].socket.id + "):", eventName, payload);
 			this.players[pn].emit(eventName, payload);

@@ -10,6 +10,8 @@ const Player = function (playerName, socket) {
 		this.cards.push(card);
 	};
 
+	this.getUsername = () => { return this.username; };
+
 	this.emit = (eventName, payload) => {
 		this.socket.emit(eventName, payload);
 	};
