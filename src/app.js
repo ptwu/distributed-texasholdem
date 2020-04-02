@@ -31,6 +31,7 @@ io.on('connection', (socket) => {
 
 		if (game.getNumPlayers() == 2) {
 			game.startGame();
+			game.emitPlayers('gameInfo', { 'roomIndex': rooms.length - 1, 'players': game.getNumPlayers() });
 		}
 
 	});
@@ -40,7 +41,7 @@ io.on('connection', (socket) => {
 		var game = rooms[payload.gameInfo.roomIndex];
 		var player = game.findPlayer(socket.id);
 
-		player.currentCard = new Card(payload.cardValue); // TODO: Improve lookup Card
+		player.currentCard = new Card(payload.cardValue);
 		game.currentlyPlayed++;
 
 		if (game.currentlyPlayed == game.getNumPlayers()) {

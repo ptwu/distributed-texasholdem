@@ -4,7 +4,6 @@ const Card = require('./card');
 const Deck = function () {
 	this.cards = [];
 
-
 	const constructor = function (deck) {
 		const suits = ["♠", "♥", "♦", "♣"];
 		for (let i = 0; i < suits.length; i++) {
@@ -30,7 +29,6 @@ const Deck = function () {
 		this.cards.splice(index, 1);
 		return value;
 	};
-
 };
 
 module.exports = Deck;

@@ -5,6 +5,7 @@ const Card = require('./card.js');
 const Game = function (numCards) {
 	this.deck = new Deck();
 	this.players = [];
+	this.community = [];
 	this.status = 0;
 	this.cardsPerPlayer = 2;
 	this.currentlyPlayed = 0;
@@ -98,7 +99,7 @@ const Game = function (numCards) {
 				return a.compare(b);
 			});
 
-			this.players[pn].emit("dealt", { cards: this.players[pn].cards });
+			this.players[pn].emit("dealt", { 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
 		}
 	};
 
@@ -111,18 +112,17 @@ const Game = function (numCards) {
 		}
 	};
 
-	this.findPlayer = function (socketId) {
+	this.findPlayer = (socketId) => {
 		for (var pn = 0; pn < this.getNumPlayers(); pn++) {
-			if (this.players[pn].socket.id == socketId) {
+			if (this.players[pn].socket.id === socketId) {
 				return this.players[pn];
 			}
 		}
 	};
 
-	this.printPretty = function () {
+	this.printPretty = () => {
 		console.log('----------------- GAME');
 		console.log('Status', this.status);
-		console.log('Cards per Player', this.cardsPerPlayer);
 		console.log('Players:');
 		this.players[0].printPretty();
 		this.players[1].printPretty();

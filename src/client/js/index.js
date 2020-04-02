@@ -1,0 +1,1 @@
+function fullScreenIntro(){$(".intro").css({height:$(window).height(),width:$(window).width()})}$(window).resize(fullScreenIntro),$(document).ready(function(){fullScreenIntro(),$(".scrollspy").scrollSpy(),$(".parallax").parallax()}),$("#learn-more").click(function(){$("html, body").animate({scrollTop:$("#about").offset().top})});
