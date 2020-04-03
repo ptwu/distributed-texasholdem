@@ -19,7 +19,10 @@ io.on('connection', (socket) => {
 		if (data.username == "") {
 			socket.emit('hostRoom', undefined);
 		} else {
-			const code = "" + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10)
+			let code;
+			do {
+				code = "" + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10);
+			} while (rooms.length != 0 && (!rooms.some(r => r.getCode == code)));
 			let game = new Game(code, data.username);
 			rooms.push(game);
 			game.addPlayer(data.username, socket);
@@ -40,11 +43,11 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('startGame', (data) => {
-		let game = rooms.find(r => r.getCode() === data.code);
+		let game = rooms.find(r => r.getCode() == data.code);
 		if (game == undefined) {
 			socket.emit('gameBegin', undefined);
 		} else {
-
+			socket.emit('gameBegin', { 'code': data.code });
 		}
 	});
 

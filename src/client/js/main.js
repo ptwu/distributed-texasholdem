@@ -34,11 +34,14 @@ socket.on("joinRoom", function (data) {
 });
 
 socket.on("gameBegin", function (data) {
-	if (data == undefined) {
-		alert('Error - invalid game.');
-	}
+	console.log('game start');
 	$('#hostModal').closeModal();
 	$('#joinModal').closeModal();
+	if (data == undefined) {
+		alert('Error - invalid game.');
+	} else {
+		$('#mainContent').html();
+	}
 });
 
 var beginHost = function () {
