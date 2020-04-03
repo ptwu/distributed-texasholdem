@@ -50,6 +50,8 @@ var beginHost = function () {
 	} else {
 		socket.emit('host', { username: $('#hostName-field').val() });
 	}
+	$("#joinButton").addClass("disabled");
+	$('#joinButton').off('click');
 }
 
 var joinRoom = function () {
@@ -58,6 +60,8 @@ var joinRoom = function () {
 	} else {
 		socket.emit('join', { code: $('#code-field').val(), username: $('#joinName-field').val() });
 	}
+	$("#hostButton").addClass("disabled");
+	$('#hostButton').off('click');
 }
 
 var startGame = function (gameCode) {
