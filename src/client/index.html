@@ -7,19 +7,32 @@
 </head>
 
 <body>
-	<div id="gameDiv" class="container">
+	<div id="gameDiv">
 		<h4>Texas Hold 'Em Game</h4>
 		<div class="row">
-			<div class="col s12 m6">
+			<div class="col s12 m3">
 				<div class="card green darken-2">
 					<div class="card-content white-text">
 						<span class="card-title" id="usernamesCards"></span>
 						<div id="mycards"></div>
 					</div>
-					<div class="card-action">
-						<button class="btn white black-text">Fold</button>
-						<button class="btn white black-text">Call</button>
-						<button class="btn white black-text">Raise</button>
+				</div>
+			</div>
+			<div class="col s12 m2">
+				<div class="card green darken-2">
+					<div class="card-content white-text center-align">
+						<span class="card-title" id="usernamesMoney"></span>
+						<button id="usernameRaise" class="btn-small white black-text">Fold</button>
+						<button id="usernameCall" class="btn-small white black-text">Call</button>
+						<button id="usernameRaise" class="btn-small white black-text">Raise</button>
+					</div>
+				</div>
+			</div>
+			<div class="col s12 m6">
+				<div class="card green darken-2">
+					<div class="card-content white-text">
+						<span class="card-title">Table</span>
+						<div id="communityCards"></div>
 					</div>
 				</div>
 			</div>
@@ -100,8 +113,8 @@
 
 	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.min.js"></script>
-	<script src="js/main.js"> </script>
-	<script src="js/materialize.min.js"></script>
+	<script src="./main.js"> </script>
+	<script src="./js/materialize.min.js"></script>
 
 </body>
 

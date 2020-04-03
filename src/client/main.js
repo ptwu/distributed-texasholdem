@@ -1,6 +1,7 @@
 $(document).ready(function () {
 	$('#gameDiv').hide();
 	$('.modal-trigger').leanModal();
+	$('.tooltipped').tooltip({ delay: 50 });
 });
 
 var socket = io('http://localhost:3000');
@@ -29,7 +30,7 @@ socket.on("hostRoom", function (data) {
 
 socket.on("joinRoom", function (data) {
 	if (data == undefined) {
-		alert('Invalid code! Not sure if that room exists.');
+		Materialize.toast('Enter a valid name/code! (max length of name is 12 characters & cannot be the same as someone else\'s)', 4000);
 	} else {
 		$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game.</p>');
 		$('#mainContent').html('<p></p>');
@@ -42,7 +43,7 @@ socket.on("joinRoom", function (data) {
 socket.on("dealt", function (data) {
 	$('#mycards').html(data.cards.map(function (c, i) { return renderCard(c, i); }));
 	$('#usernamesCards').text(data.username + " - My Cards");
-	$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p); }));
+	$('#opponentCards').html(data.players.map(function (p) { return (p != data.username ? renderOpponent(p, { 'text': 'Waiting...', 'money': 100 }) : '&nbsp;') }));
 });
 
 socket.on("gameBegin", function (data) {
@@ -51,7 +52,6 @@ socket.on("gameBegin", function (data) {
 	if (data == undefined) {
 		alert('Error - invalid game.');
 	} else {
-		$('#mainContent').addClass('container');
 		$('#gameDiv').show();
 	}
 });
@@ -67,8 +67,9 @@ var beginHost = function () {
 }
 
 var joinRoom = function () {
-	if ($('#joinName-field').val() == "" || $('#code-field').val() == "") {
-		alert('Enter a valid name/code!');
+	if ($('#joinName-field').val() == "" || $('#code-field').val() == "" || $('#joinName-field').val().length > 12) {
+		$('.toast').hide();
+		Materialize.toast('Enter a valid name/code! (max length of name is 12 characters.)', 4000);
 	} else {
 		socket.emit('join', { code: $('#code-field').val(), username: $('#joinName-field').val() });
 	}
@@ -81,9 +82,12 @@ var startGame = function (gameCode) {
 }
 
 function renderCard(card) {
-	return '<div class="playingCard" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';
+	if (card.suit == '♠' || card.suit == '♣')
+		return '<div class="playingCard_black" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';
+	else
+		return '<div class="playingCard_red" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';
 }
 
-function renderOpponent(name) {
-	return '<div class="col m2"><div class="card green darken-2"><div class="card-content white-text"><span class="card-title" >' + name + '</span>	<div id="mycards"></div><div class="blankCard" id="opponent-card"></div><div class="blankCard" id="opponent-card"></div></div></div></div>';
+function renderOpponent(name, data) {
+	return '<div class="col s12 m2"><div class="card green darken-2"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 }

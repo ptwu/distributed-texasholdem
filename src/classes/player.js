@@ -3,6 +3,7 @@ const Player = function (playerName, socket) {
 	this.cards = [];
 	this.socket = socket;
 	this.currentCard = null;
+	this.money = 100;
 
 	const constructor = function () { }(this);
 

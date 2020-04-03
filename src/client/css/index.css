@@ -11,6 +11,13 @@
 
 #mainContent {
   height: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#gameDiv {
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 html,
@@ -34,30 +41,51 @@ code {
   background-color: #ebebeb;
 }
 
-.playingCard {
+.playingCard_black {
   float: left;
   border: 5px solid black;
   background-color: white;
   border-radius: 5px;
-  height: 150px;
-  width: 100px;
+  height: 135px;
+  width: 90px;
   color: black;
   padding: 5px;
   margin: 8px;
-  cursor: pointer;
-  font-size: 3em;
+  font-size: 26px;
+}
+
+#usernamesMoney {
+  font-size: 
+}
+
+.playingCard_red {
+  float: left;
+  border: 5px solid black;
+  background-color: white;
+  border-radius: 5px;
+  height: 135px;
+  width: 90px;
+  color: red;
+  padding: 5px;
+  margin: 8px;
+  font-size: 26px;
 }
 
 .blankCard {
   float: left;
-  background-color: blue;
+  background: repeating-linear-gradient(
+    45deg,
+    #606dbc,
+    #606dbc 10px,
+    #465298 10px,
+    #465298 20px
+  );
   border: 5px solid black;
   border-radius: 5px;
   height: 84px;
   width: 60px;
   padding: 10px;
   margin: 8px;
-  cursor: pointer;
   font-size: 5em;
 }
 
@@ -68,4 +96,15 @@ code {
 
 #divStart {
   text-align: center;
+}
+
+.modal {
+  position: absolute;
+  z-index: 200000 !important;
+}
+
+.toast {
+  position: relative;
+  z-index: -1 !important;
+  background: red;
 }

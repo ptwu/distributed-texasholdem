@@ -11,6 +11,12 @@ const Game = function (name, host) {
 	this.currentlyPlayed = 0;
 	this.gameWinner = null;
 	this.gameName = name;
+	this.roundNum;
+	this.roundData = [];
+
+	const constructor = function () {
+		roundNum = 0;
+	}(this);
 
 	this.setCardsPerPlayer = (numCards) => {
 		this.cardsPerPlayer = numCards;
@@ -36,6 +42,17 @@ const Game = function (name, host) {
 		this.dealCards();
 		this.emitPlayers('startGame', { 'players': this.players.map(function (p) { return p.username; }) });
 		this.printPretty();
+	};
+
+	this.nextPlayer = () => {
+		
+	}
+
+	this.startRound = () => {
+		if(roundNum == 0) {
+
+		}
+		roundNum++;
 	};
 
 	this.dealCards = () => {

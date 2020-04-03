@@ -16,13 +16,13 @@ let rooms = [];
 io.on('connection', (socket) => {
 	console.log('new connection ', socket.id);
 	socket.on('host', (data) => {
-		if (data.username == "") {
+		if (data.username == "" || data.username.length > 12) {
 			socket.emit('hostRoom', undefined);
 		} else {
 			let code;
 			do {
 				code = "" + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10);
-			} while (rooms.length != 0 && (!rooms.some(r => r.getCode == code)));
+			} while (rooms.length != 0 && (rooms.some(r => r.getCode == code)));
 			let game = new Game(code, data.username);
 			rooms.push(game);
 			game.addPlayer(data.username, socket);
@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
 
 	socket.on('join', (data) => {
 		let game = rooms.find(r => r.getCode() === data.code);
-		if (game == undefined || data.username == undefined) {
+		if ((game == undefined || game.getPlayersArray().some(p => p == data.username)) || data.username == undefined || data.username.length > 12) {
 			socket.emit('joinRoom', undefined);
 		} else {
 			game.addPlayer(data.username, socket);
