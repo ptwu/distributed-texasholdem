@@ -1,3 +1,8 @@
+$(document).ready(function () {
+	$('#gameDiv').hide();
+	$('.modal-trigger').leanModal();
+});
+
 var socket = io('http://localhost:3000');
 var gameInfo = null;
 
@@ -27,20 +32,27 @@ socket.on("joinRoom", function (data) {
 		alert('Invalid code! Not sure if that room exists.');
 	} else {
 		$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game.</p>');
+		$('#mainContent').html('<p></p>');
 		$('#playersNamesJoined').html(data.players.map(function (p) {
 			return '<span>' + p + '</span><br />';
 		}));
 	}
 });
 
+socket.on("dealt", function (data) {
+	$('#mycards').html(data.cards.map(function (c, i) { return renderCard(c, i); }));
+	$('#usernamesCards').text(data.username + " - My Cards");
+	$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p); }));
+});
+
 socket.on("gameBegin", function (data) {
-	console.log('game start');
-	$('#hostModal').closeModal();
 	$('#joinModal').closeModal();
+	$('#hostModal').closeModal();
 	if (data == undefined) {
 		alert('Error - invalid game.');
 	} else {
-		$('#mainContent').html();
+		$('#mainContent').addClass('container');
+		$('#gameDiv').show();
 	}
 });
 
@@ -67,10 +79,6 @@ var joinRoom = function () {
 var startGame = function (gameCode) {
 	socket.emit('startGame', { code: gameCode });
 }
-
-$(document).ready(function () {
-	$('.modal-trigger').leanModal();
-});
 
 function renderCard(card) {
 	return '<div class="playingCard" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';

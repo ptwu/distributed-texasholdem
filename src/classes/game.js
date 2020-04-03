@@ -101,24 +101,23 @@ const Game = function (name, host) {
 	};
 
 	this.refreshCards = function () {
-		for (var pn = 0; pn < this.getNumPlayers(); pn++) {
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].cards.sort(function (a, b) {
 				return a.compare(b);
 			});
 
-			this.players[pn].emit("dealt", { 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
+			this.players[pn].emit("dealt", { 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
 		}
 	};
 
 	this.emitPlayers = function (eventName, payload) {
-		for (var pn = 0; pn < this.getNumPlayers(); pn++) {
-			// console.log("Emit p" + pn + " (Socket: " + this.players[pn].socket.id + "):", eventName, payload);
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit(eventName, payload);
 		}
 	};
 
 	this.findPlayer = (socketId) => {
-		for (var pn = 0; pn < this.getNumPlayers(); pn++) {
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			if (this.players[pn].socket.id === socketId) {
 				return this.players[pn];
 			}

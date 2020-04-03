@@ -47,7 +47,8 @@ io.on('connection', (socket) => {
 		if (game == undefined) {
 			socket.emit('gameBegin', undefined);
 		} else {
-			socket.emit('gameBegin', { 'code': data.code });
+			game.emitPlayers('gameBegin', { 'code': data.code });
+			game.startGame();
 		}
 	});
 

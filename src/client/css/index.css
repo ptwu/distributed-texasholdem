@@ -9,13 +9,8 @@
   src: url("font/Metropolis-Bold.otf"), url("font/Metropolis-Bold.otf") format("opentype");
 }
 
-#header div {
-  /* float: left; */
-  margin-left: 10px;
-}
-
-#divStart {
-  text-align: center;
+#mainContent {
+  height: 100%;
 }
 
 html,
@@ -37,4 +32,40 @@ body {
 code {
   font-size: 24px;
   background-color: #ebebeb;
+}
+
+.playingCard {
+  float: left;
+  border: 5px solid black;
+  background-color: white;
+  border-radius: 5px;
+  height: 150px;
+  width: 100px;
+  color: black;
+  padding: 5px;
+  margin: 8px;
+  cursor: pointer;
+  font-size: 3em;
+}
+
+.blankCard {
+  float: left;
+  background-color: blue;
+  border: 5px solid black;
+  border-radius: 5px;
+  height: 84px;
+  width: 60px;
+  padding: 10px;
+  margin: 8px;
+  cursor: pointer;
+  font-size: 5em;
+}
+
+.selected {
+  background: grey;
+  border: 2px solid red;
+}
+
+#divStart {
+  text-align: center;
 }

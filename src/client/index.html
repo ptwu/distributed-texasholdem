@@ -7,22 +7,45 @@
 </head>
 
 <body>
-	<div class="mainContent valign-wrapper row login-box">
-		<div class="col card hoverable s12 m4">
-			<form>
-				<div class="card-content">
-					<span class="card-title black-text">Texas Hold &apos;Em Poker - Distributed</span>
-					<p>Welcome to Texas Hold &apos;Em Poker!</p>
+	<div id="gameDiv" class="container">
+		<h4>Texas Hold 'Em Game</h4>
+		<div class="row">
+			<div class="col s12 m6">
+				<div class="card green darken-2">
+					<div class="card-content white-text">
+						<span class="card-title" id="usernamesCards"></span>
+						<div id="mycards"></div>
+					</div>
+					<div class="card-action">
+						<button class="btn white black-text">Fold</button>
+						<button class="btn white black-text">Call</button>
+						<button class="btn white black-text">Raise</button>
+					</div>
 				</div>
-				<div class="card-action center-align">
-					<a id="hostButton" class="btn-large waves-effect waves-light indigo darken-3 white-text modal-trigger"
-						href="#hostModal">Host
-						Game</a>
-					<a id="joinButton" class="btn-large waves-effect waves-light indigo darken-3 white-text modal-trigger"
-						href="#joinModal">Join
-						Game</a>
-				</div>
-			</form>
+			</div>
+		</div>
+		<div class="row">
+			<div id="opponentCards"></div>
+		</div>
+	</div>
+	<div id="mainContent">
+		<div class=" valign-wrapper row login-box">
+			<div class="col card hoverable s12 m4">
+				<form>
+					<div class="card-content">
+						<span class="card-title black-text">Texas Hold &apos;Em Poker - Distributed</span>
+						<p>Welcome to Texas Hold &apos;Em Poker!</p>
+					</div>
+					<div class="card-action center-align">
+						<a id="hostButton" class="btn-large waves-effect waves-light indigo darken-3 white-text modal-trigger"
+							href="#hostModal">Host
+							Game</a>
+						<a id="joinButton" class="btn-large waves-effect waves-light indigo darken-3 white-text modal-trigger"
+							href="#joinModal">Join
+							Game</a>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
 	<div id="hostModal" class="modal">
