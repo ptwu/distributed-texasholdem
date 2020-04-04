@@ -7,6 +7,7 @@ const Player = function (playerName, socket) {
 	this.buyIns = 0;
 	this.status = 'none';
 	this.blindValue = 'none';
+	this.allInAmt = 0;
 
 	const constructor = function () { }(this);
 
@@ -18,6 +19,7 @@ const Player = function (playerName, socket) {
 	this.setBlind = (data) => this.blindValue = data;
 	this.getUsername = () => { return this.username; };
 	this.getBuyIns = () => { return this.buyIns; };
+	this.getMoney = () => { return this.money; };
 	this.getStatus = () => { return this.status; };
 	this.getBlindValue = () => { return this.blindValue; };
 

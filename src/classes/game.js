@@ -14,15 +14,37 @@ const Game = function (name, host) {
 	this.roundNum;
 	this.roundData = {};
 	this.currentBet = 0;
+	this.community = [];
 
 	const constructor = function () {
 		this.roundNum = 0;
+		this.roundData = { 'bigBlind': '', 'smallBlind': '', 'turn': '', 'currentBet': 0 };
 	}(this);
 
 	this.startNewRound = () => {
 		if (roundNum == 0) {
 			const bigBlindIndex = Math.floor(Math.random() * this.players.length);
 			const smallBlindIndex = (bigBlindIndex + 1 >= this.players.length) ? 0 : bigBlindIndex + 1;
+			for (let i = 0; i < this.players.length; i++) {
+				if (i === bigBlindIndex) {
+					this.players[i].setBlind('Big Blind');
+				} else if (i === smallBlindIndex) {
+					this.players[i].setBlind('Small Blind');
+				} else {
+					this.players[i].setBlind('none');
+				}
+			}
+			const goFirstIndex = (bigBlindIndex - 1 < 0) ? (this.players.length - 1) : bigBlindIndex - 1;
+			roundData.bigBlind = this.players[bigBlindIndex].getUsername();
+			roundData.smallBlind = this.players[smallBlindIndex].getUsername();
+			roundData.turn = this.players[goFirstIndex].getUsername();
+			this.players[goFirstIndex].setStatus('Their Turn');
+			roundData.currentBet = 2;
+			//preflop left of big blind and then other stages are small blind
+			//then positions move to the left
+		} else {
+			const bigBlindIndex = (roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : roundData.bigBlind - 1;
+			const smallBlindIndex = (roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : roundData.smallBlind - 1;
 			for (let i = 0; i < this.players.length; i++) {
 				if (i === bigBlindIndex) {
 					players[i].setBlind('Big Blind');
@@ -32,23 +54,42 @@ const Game = function (name, host) {
 					players[i].setBlind('none');
 				}
 			}
-			const goFirstIndex = (bigBlindIndex - 1 < 0) ? (this.players.length - 1) : bigBlindIndex - 1;
-			roundData.bigBlind = bigBlindIndex;
-			roundData.smallBlind = smallBlindIndex;
-			roundData.turn = goFirstIndex;
-			roundData.currentBet = 2;
-			//preflop left of big blind and then other stages are small blind
-			//then positions move to the left
-		} else {
-			const bigBlindIndex = (roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : roundData.bigBlind - 1;
-			const smallBlindIndex = (roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : roundData.smallBlind - 1;
-			roundData.bigBlind = bigBlindIndex;
-			roundData.smallBlind = smallBlindIndex;
-			roundData.turn = smallBlindIndex;
-			roundNum++;
-			// if()
+			roundData.bigBlind = this.players[bigBlindIndex].getUsername();
+			roundData.smallBlind = this.players[smallBlindIndex].getUsername();
+			roundData.turn = this.players[smallBlindIndex].getUsername();
+			this.players[smallBlindIndex].setStatus('Their Turn');
+			if (this.players[bigBlindIndex].money < 2) {
+				this.players[bigBlindIndex].money = 0;
+				this.players[bigBlindIndex].allInAmt = 1;
+			}
 		}
+		roundNum++;
+		roundData.stageName = 'Pre-Flop';
+		roundData.pot = 0;
+
+		this.rerender();
+
 	};
+
+	this.rerender = () => {
+		let playersData = [];
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
+			playersData.push({ 'username': this.players[pn].getUsername(), 'status': this.players[pn].getStatus(), 'money': this.players[pn].getMoney() })
+		}
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
+			this.players[pn].emit('rerender', { 'username': this.players[pn].getUsername(), 'round': roundNum, 'stage': roundData.stageName, 'pot': roundData.pot, 'players': playersData, 'myMoney': this.players[pn].getMoney(), 'myStatus': this.players[pn].getStatus() });
+		}
+	}
+
+	this.moveOntoNextPlayer = () => {
+		if (this.status == 0) {
+			this.status = 1;
+
+		} else {
+			this.status = 0;
+			startNewRound();
+		}
+	}
 
 	this.setCardsPerPlayer = (numCards) => {
 		this.cardsPerPlayer = numCards;
@@ -69,10 +110,9 @@ const Game = function (name, host) {
 	};
 
 	this.startGame = () => {
-		this.status = 1;
-
 		this.dealCards();
 		this.emitPlayers('startGame', { 'players': this.players.map(p => { return p.username; }) });
+		this.startNewRound();
 		this.printPretty();
 	};
 
@@ -108,6 +148,7 @@ const Game = function (name, host) {
 				return this.players[pn];
 			}
 		}
+		return undefined;
 	};
 
 	this.printPretty = () => {

@@ -111,5 +111,4 @@ code {
 .toast {
   position: relative;
   z-index: -1 !important;
-  background: red;
 }

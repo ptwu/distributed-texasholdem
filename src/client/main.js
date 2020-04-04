@@ -49,13 +49,13 @@ socket.on("joinRoom", function (data) {
 socket.on("dealt", function (data) {
 	$('#mycards').html(data.cards.map(function (c, i) { return renderCard(c, i); }));
 	$('#usernamesCards').text(data.username + " - My Cards");
-	$('#opponentCards').html(data.players.map(function (p) { return (p != data.username ? renderOpponent(p, { 'text': 'Waiting...', 'money': 100 }) : '&nbsp;') }));
+	$('#opponentCards').html(data.players.map(function (p) { return (p != data.username ? renderOpponent(p, { 'text': 'Waiting...', 'money': 1337 }) : '&nbsp;') }));
 	renderSelf({ 'money': 100, 'text': 'Not Their Turn' });
 });
 
 socket.on("rerender", function (data) {
-	$('#table-title').text('Round ' + data.round + " | " + data.stage + " | Pot: " + data.pot);
-	$('#opponentCards').html(data.players.map(function (p) { return (p != data.username ? renderOpponent(p, { 'text': ' Buy-ins', 'money': 100 }) : '&nbsp;') }));
+	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Pot: $" + data.pot);
+	$('#opponentCards').html(data.players.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.status, 'money': p.money }) : '&nbsp;') }));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus });
 });
 
@@ -97,6 +97,22 @@ var startGame = function (gameCode) {
 	socket.emit('startGame', { code: gameCode });
 }
 
+var fold = function () {
+	socket.emit('moveMade', { move: 'fold' });
+}
+
+var call = function () {
+	socket.emit('moveMade', { move: 'call' });
+}
+
+var check = function () {
+	socket.emit('moveMade', { move: 'check' });
+}
+
+var raise = function () {
+	socket.emit('moveMade', { move: 'raise' });
+}
+
 function renderCard(card) {
 	if (card.suit == '♠' || card.suit == '♣')
 		return '<div class="playingCard_black" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';
@@ -105,7 +121,7 @@ function renderCard(card) {
 }
 
 function renderOpponent(name, data) {
-	return '<div class="col s12 m2"><div class="card green darken-2"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+	return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 }
 
 function renderSelf(data) {
@@ -116,6 +132,8 @@ function renderSelf(data) {
 		$("#usernameCall").prop('disabled', true);
 		$("#usernameRaise").prop('disabled', true);
 	} else {
+		$("#status").text('My Turn');
+		Materialize.toast('My Turn', 4000);
 		$("#usernameFold").prop('disabled', false);
 		$("#usernameCheck").prop('disabled', false);
 		$("#usernameCall").prop('disabled', false);

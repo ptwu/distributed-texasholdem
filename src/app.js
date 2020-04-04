@@ -52,30 +52,47 @@ io.on('connection', (socket) => {
 		}
 	});
 
-	socket.on('sendCard', (payload) => {
-		console.log(payload);
-		var game = rooms[payload.gameInfo.roomIndex];
-		var player = game.findPlayer(socket.id);
+	socket.on('moveMade', (data) => {
+		//O(num_rooms * num_players_in_room)
 
-		player.currentCard = new Card(payload.cardValue);
-		game.currentlyPlayed++;
-
-		if (game.currentlyPlayed == game.getNumPlayers()) {
-			game.endTurn();
-		}
-
-		game.updateGame();
-		game.printPretty();
-
-		// If somebody has no cards left, end game.
-		if (game.hasGameEnded()) {
-			console.log('Game ended');
-			game.emitPlayers('gameEnded', { 'winner': game.gameWinner.username });
-		}
-
+		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		if (game != undefined) {
+			if (data.move == 'fold') {
+				game.moveOntoNextPlayer();
+			} else if (data.move == 'check') {
+				game.moveOntoNextPlayer();
+			} else if (data.move == 'call') {
+				game.moveOntoNextPlayer();
+			} else if (data.move == 'raise') {
+				game.moveOntoNextPlayer();
+			}
+		} else { console.log('ERROR: can\'t find game!!!'); }
 	});
 
-	socket.on('disconnect', () => console.log('disconnect'));
+	// socket.on('sendCard', (payload) => {
+	// 	console.log(payload);
+	// 	var game = rooms[payload.gameInfo.roomIndex];
+	// 	var player = game.findPlayer(socket.id);
+
+	// 	player.currentCard = new Card(payload.cardValue);
+	// 	game.currentlyPlayed++;
+
+	// 	if (game.currentlyPlayed == game.getNumPlayers()) {
+	// 		game.endTurn();
+	// 	}
+
+	// 	game.updateGame();
+	// 	game.printPretty();
+
+	// 	// If somebody has no cards left, end game.
+	// 	if (game.hasGameEnded()) {
+	// 		console.log('Game ended');
+	// 		game.emitPlayers('gameEnded', { 'winner': game.gameWinner.username });
+	// 	}
+
 });
+
+// 	socket.on('disconnect', () => console.log('disconnect'));
+// });
 
 server.listen(3000);
