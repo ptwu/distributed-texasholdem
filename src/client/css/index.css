@@ -51,11 +51,12 @@ code {
   color: black;
   padding: 5px;
   margin: 8px;
-  font-size: 26px;
+  font-size: 28px;
 }
 
 #usernamesMoney {
-  font-size: 
+  font-size: 30px;
+  min-height: 219px;
 }
 
 .playingCard_red {
@@ -68,7 +69,12 @@ code {
   color: red;
   padding: 5px;
   margin: 8px;
-  font-size: 26px;
+  font-size: 28px;
+}
+
+.menuButtons {
+  zoom: 0.80;
+  margin: 2px;
 }
 
 .blankCard {
@@ -100,7 +106,6 @@ code {
 
 .modal {
   position: absolute;
-  z-index: 200000 !important;
 }
 
 .toast {

@@ -12,11 +12,43 @@ const Game = function (name, host) {
 	this.gameWinner = null;
 	this.gameName = name;
 	this.roundNum;
-	this.roundData = [];
+	this.roundData = {};
+	this.currentBet = 0;
 
 	const constructor = function () {
-		roundNum = 0;
+		this.roundNum = 0;
 	}(this);
+
+	this.startNewRound = () => {
+		if (roundNum == 0) {
+			const bigBlindIndex = Math.floor(Math.random() * this.players.length);
+			const smallBlindIndex = (bigBlindIndex + 1 >= this.players.length) ? 0 : bigBlindIndex + 1;
+			for (let i = 0; i < this.players.length; i++) {
+				if (i === bigBlindIndex) {
+					players[i].setBlind('Big Blind');
+				} else if (i === smallBlindIndex) {
+					players[i].setBlind('Small Blind');
+				} else {
+					players[i].setBlind('none');
+				}
+			}
+			const goFirstIndex = (bigBlindIndex - 1 < 0) ? (this.players.length - 1) : bigBlindIndex - 1;
+			roundData.bigBlind = bigBlindIndex;
+			roundData.smallBlind = smallBlindIndex;
+			roundData.turn = goFirstIndex;
+			roundData.currentBet = 2;
+			//preflop left of big blind and then other stages are small blind
+			//then positions move to the left
+		} else {
+			const bigBlindIndex = (roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : roundData.bigBlind - 1;
+			const smallBlindIndex = (roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : roundData.smallBlind - 1;
+			roundData.bigBlind = bigBlindIndex;
+			roundData.smallBlind = smallBlindIndex;
+			roundData.turn = smallBlindIndex;
+			roundNum++;
+			// if()
+		}
+	};
 
 	this.setCardsPerPlayer = (numCards) => {
 		this.cardsPerPlayer = numCards;
@@ -24,7 +56,7 @@ const Game = function (name, host) {
 
 	this.getHostName = () => { return this.host; };
 
-	this.getPlayersArray = () => { return this.players.map(function (p) { return p.getUsername(); }) };
+	this.getPlayersArray = () => { return this.players.map(p => { return p.getUsername(); }) };
 
 	this.getCode = () => { return this.gameName; };
 
@@ -40,19 +72,8 @@ const Game = function (name, host) {
 		this.status = 1;
 
 		this.dealCards();
-		this.emitPlayers('startGame', { 'players': this.players.map(function (p) { return p.username; }) });
+		this.emitPlayers('startGame', { 'players': this.players.map(p => { return p.username; }) });
 		this.printPretty();
-	};
-
-	this.nextPlayer = () => {
-		
-	}
-
-	this.startRound = () => {
-		if(roundNum == 0) {
-
-		}
-		roundNum++;
 	};
 
 	this.dealCards = () => {
@@ -65,61 +86,9 @@ const Game = function (name, host) {
 		this.refreshCards();
 	};
 
-	this.endTurn = () => {
-		var result = this.players[0].currentCard.compare(this.players[1].currentCard);
-
-		var winner;
-
-		if (result == 1) {
-			this.players[1].removeCard(this.players[1].currentCard);
-			this.players[0].addCard(this.players[1].currentCard);
-			winner = this.players[0].username;
-		} else if (result == -1) {
-			this.players[0].removeCard(this.players[0].currentCard);
-			this.players[1].addCard(this.players[0].currentCard);
-
-			winner = this.players[1].username;
-		} else {
-			// Draw (in theory impossible, we don't have two cards equals :-P )
-			winner = 'draw';
-		}
-
-		this.players[0].currentCard = null;
-		this.players[1].currentCard = null;
-		this.currentlyPlayed = 0;
-
-		// Emit dealt to each player their cards
-		this.refreshCards();
-
-		// Emit turnResult all players
-		this.emitPlayers('turnResult', { winner: winner });
-	};
-
-	this.updateGame = function () {
-		// Check if the game has ended
-
-		if (this.players[0].getNumCards() === 0) {
-			this.status = 2;
-			this.gameWinner = this.players[1];
-		}
-
-		if (this.players[1].getNumCards() === 0) {
-			this.status = 2;
-			this.gameWinner = this.players[0];
-		}
-	};
-
-	this.hasGameEnded = function () {
-		return this.status == 2;
-	};
-
-	this.isWaiting = function () {
-		return this.status === 0;
-	};
-
 	this.refreshCards = function () {
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			this.players[pn].cards.sort(function (a, b) {
+			this.players[pn].cards.sort((a, b) => {
 				return a.compare(b);
 			});
 
@@ -127,7 +96,7 @@ const Game = function (name, host) {
 		}
 	};
 
-	this.emitPlayers = function (eventName, payload) {
+	this.emitPlayers = (eventName, payload) => {
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit(eventName, payload);
 		}
@@ -145,8 +114,7 @@ const Game = function (name, host) {
 		console.log('----------------- GAME');
 		console.log('Status', this.status);
 		console.log('Players:');
-		this.players[0].printPretty();
-		this.players[1].printPretty();
+		this.players.map(p => p.printPretty());
 		console.log('----------------- GAME');
 	};
 

@@ -4,6 +4,9 @@ const Player = function (playerName, socket) {
 	this.socket = socket;
 	this.currentCard = null;
 	this.money = 100;
+	this.buyIns = 0;
+	this.status = 'none';
+	this.blindValue = 'none';
 
 	const constructor = function () { }(this);
 
@@ -11,14 +14,19 @@ const Player = function (playerName, socket) {
 		this.cards.push(card);
 	};
 
+	this.setStatus = (data) => this.status = data;
+	this.setBlind = (data) => this.blindValue = data;
 	this.getUsername = () => { return this.username; };
+	this.getBuyIns = () => { return this.buyIns; };
+	this.getStatus = () => { return this.status; };
+	this.getBlindValue = () => { return this.blindValue; };
 
 	this.emit = (eventName, payload) => {
 		this.socket.emit(eventName, payload);
 	};
 
-	this.printPretty = function () {
-		var cardsMsg = 'Cards: ';
+	this.printPretty = () => {
+		let cardsMsg = 'Cards: ';
 		for (i = 0; i < this.cards.length; i++) {
 			cardsMsg += this.cards[i].getValue() + " " + this.cards[i].getSuit() + ', ';
 		}
