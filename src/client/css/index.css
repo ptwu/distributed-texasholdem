@@ -77,6 +77,10 @@ code {
   margin: 2px;
 }
 
+.theirTurn {
+  border: 5px solid yellow;
+}
+
 .blankCard {
   float: left;
   background: repeating-linear-gradient(

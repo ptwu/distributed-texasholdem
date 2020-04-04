@@ -5,8 +5,8 @@ const Player = function (playerName, socket) {
 	this.currentCard = null;
 	this.money = 100;
 	this.buyIns = 0;
-	this.status = 'none';
-	this.blindValue = 'none';
+	this.status = '';
+	this.blindValue = '';
 	this.allInAmt = 0;
 
 	const constructor = function () { }(this);
@@ -21,7 +21,7 @@ const Player = function (playerName, socket) {
 	this.getBuyIns = () => { return this.buyIns; };
 	this.getMoney = () => { return this.money; };
 	this.getStatus = () => { return this.status; };
-	this.getBlindValue = () => { return this.blindValue; };
+	this.getBlind = () => { return this.blindValue; };
 
 	this.emit = (eventName, payload) => {
 		this.socket.emit(eventName, payload);
