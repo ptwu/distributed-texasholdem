@@ -37,15 +37,15 @@ const Game = function (name, host) {
 				}
 			}
 			const goFirstIndex = (bigBlindIndex - 1 < 0) ? (this.players.length - 1) : bigBlindIndex - 1;
-			this.roundData.bigBlind = this.players[bigBlindIndex].getUsername();
-			this.roundData.smallBlind = this.players[smallBlindIndex].getUsername();
+			this.roundData.bigBlind = bigBlindIndex;
+			this.roundData.smallBlind = smallBlindIndex;
 			this.roundData.turn = this.players[goFirstIndex].getUsername();
 			this.players[goFirstIndex].setStatus('Their Turn');
 			//preflop left of big blind and then other stages are small blind
 			//then positions move to the left
 		} else {
-			bigBlindIndex = (roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : roundData.bigBlind - 1;
-			smallBlindIndex = (roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : roundData.smallBlind - 1;
+			bigBlindIndex = (this.roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : this.roundData.bigBlind - 1;
+			smallBlindIndex = (this.roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : this.roundData.smallBlind - 1;
 			for (let i = 0; i < this.players.length; i++) {
 				if (i === bigBlindIndex) {
 					this.players[i].setBlind('Big Blind');
@@ -55,8 +55,8 @@ const Game = function (name, host) {
 					this.players[i].setBlind('');
 				}
 			}
-			this.roundData.bigBlind = this.players[bigBlindIndex].getUsername();
-			this.roundData.smallBlind = this.players[smallBlindIndex].getUsername();
+			this.roundData.bigBlind = bigBlindIndex;
+			this.roundData.smallBlind = smallBlindIndex;
 			this.roundData.turn = this.players[smallBlindIndex].getUsername();
 			this.players[smallBlindIndex].setStatus('Their Turn');
 
