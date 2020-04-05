@@ -70,6 +70,10 @@ socket.on("gameBegin", function (data) {
 	}
 });
 
+socket.on("reveal", function (data) {
+	$('#opponentCards').html(data.map(function (p) { return (p.username != data.username) ? renderOpponentCards(p.username, p.cards) : '&nbsp;' }));
+});
+
 var beginHost = function () {
 	if ($('#hostName-field').val() == "") {
 		$('.toast').hide();
@@ -134,7 +138,9 @@ function renderOpponent(name, data) {
 				bet = arr[pn].bet;
 		}
 	}
-
+	if (data.bet == 'Fold') {
+		return '<div class="col s12 m2 opponentCard"><div class="card grey"><div class="card-content white-text"><span class="card-title">' + name + ' (Fold)</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+	}
 	if (data.text == 'Their Turn') {
 		if (bet == 0) {
 			return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
@@ -160,7 +166,8 @@ function renderOpponentCards(name, data) {
 		}
 	}
 
-	return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+	if (bet != 'Fold') return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+	else '<div class="col s12 m2 opponentCard"><div class="card grey" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 }
 
 function renderOpponentCard(card) {
@@ -175,6 +182,15 @@ function renderSelf(data) {
 	if (data.text != 'Their Turn') {
 		$("#status").text('');
 		$("#playerInformationCard").removeClass('theirTurn');
+		$("#usernameFold").prop('disabled', true);
+		$("#usernameCheck").prop('disabled', true);
+		$("#usernameBet").prop('disabled', true);
+		$("#usernameCall").prop('disabled', true);
+		$("#usernameRaise").prop('disabled', true);
+	} else if (data.text == 'Fold') {
+		$("#status").text('Folded');
+		$("#playerInformationCard").removeClass('theirTurn');
+		Materialize.toast('You folded', 3000);
 		$("#usernameFold").prop('disabled', true);
 		$("#usernameCheck").prop('disabled', true);
 		$("#usernameBet").prop('disabled', true);

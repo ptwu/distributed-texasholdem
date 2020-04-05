@@ -58,7 +58,6 @@ io.on('connection', (socket) => {
 
 		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game != undefined) {
-			console.log(game.roundData.bets[game.roundData.bets.length - 1]);
 			if (game.findPlayer(socket.id).blindValue == 'Big Blind' && game.roundData.bets.length == 1) game.bigBlindWent = true;
 			if (data.move == 'fold') {
 				let preFoldBetAmount = 0;
@@ -68,6 +67,7 @@ io.on('connection', (socket) => {
 						preFoldBetAmount += roundDataStage.bet;
 					}
 				}
+				game.findPlayer(socket.id).setStatus('Fold');
 				game.foldPot = game.foldPot + preFoldBetAmount;
 				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: 'Fold' } : a);
 				game.moveOntoNextPlayer();

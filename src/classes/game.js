@@ -142,22 +142,8 @@ const Game = function (name, host) {
 	}
 
 	this.moveOntoNextPlayer = () => {
+		console.log(this.roundData.bets[this.roundData.bets.length - 1]);
 		if (this.isStageComplete()) {
-			//check if everyone folded except one player
-			let numNonFolds = 0;
-			let nonFolderPlayer;
-			for (let i = 0; i < this.roundData.bets[this.roundData.bets.length - 1].length; i++) {
-				if (this.roundData.bets[this.roundData.bets.length - 1][i].bet != 'Fold') {
-					numNonFolds++;
-					nonFolderPlayer = this.roundData.bets[this.roundData.bets.length - 1][i].player;
-				}
-			}
-			if (numNonFolds == 1) {
-				// everyone folded, start new round, give pot to player
-				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
-				this.startNewRound();
-			}
-
 			// stage-by-stage logic.
 			if (this.roundData.bets.length == 1) {
 				this.community.push(this.deck.dealRandomCard());
@@ -194,26 +180,46 @@ const Game = function (name, host) {
 			} else if (this.roundData.bets.length == 4) {
 				// TODO poker hand winner logic
 				this.revealCards();
-				this.startNewRound();
 			} else {
 				console.log('This stage of the round is INVALID!!');
 			}
 		} else {
-			let currTurnIndex = 0;
-			for (let i = 0; i < this.players.length; i++) {
-				if (this.players[i].getStatus() == 'Their Turn') {
-					currTurnIndex = i;
-					this.players[i].setStatus('');
+			//check if everyone folded except one player
+			let numNonFolds = 0;
+			let nonFolderPlayer;
+			for (let i = 0; i < this.getNumPlayers(); i++) {
+				if (this.players[i].getStatus() != 'Fold') {
+					numNonFolds++;
+					nonFolderPlayer = this.players[i];
 				}
 			}
-			currTurnIndex = (currTurnIndex - 1 < 0) ? (this.players.length - 1) : (currTurnIndex - 1);
-			this.players[currTurnIndex].setStatus('Their Turn');
+			console.log('number of non folds:' + numNonFolds);
+			if (numNonFolds == 1) {
+				// everyone folded, start new round, give pot to player
+				console.log('everyone folded except one');
+				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
+				this.startNewRound();
+			} else {
+				let currTurnIndex = 0;
+				for (let i = 0; i < this.players.length; i++) {
+					if (this.players[i].getStatus() == 'Their Turn') {
+						currTurnIndex = i;
+						this.players[i].setStatus('');
+					}
+				}
+				do {
+					currTurnIndex = (currTurnIndex - 1 < 0) ? (this.players.length - 1) : (currTurnIndex - 1)
+				} while (this.players[currTurnIndex].getStatus() == 'Fold');
+				this.players[currTurnIndex].setStatus('Their Turn');
+			}
 		}
 		this.rerender();
 	}
 
 	this.revealCards = () => {
-		console.log('revealll');
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
+			this.emitPlayers('reveal', { 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards });
+		}
 	}
 
 	this.isStageComplete = () => {

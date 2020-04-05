@@ -115,6 +115,30 @@
 			<a href="#!" class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
 		</div>
 	</div>
+
+	<div id="betModal" class="modal">
+		<div class="modal-content">
+			<h4>Bet</h4>
+			<div id="joinModalContent">
+				<p>Enter the your name and the code provided by the host to join their room:</p>
+				<div class="input-field col s12">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="joinName-field" required="required" />
+				</div>
+				<div class="input-field col s12">
+					<label for="code">Code</label>
+					<input type="text" name="code" id="code-field" required="required" />
+				</div>
+				<button onclick=joinRoom() type="submit"
+					class="waves-effect waves-light indigo darken-3 white-text btn-flat">Join
+					Game</button>
+			</div>
+			<div id="playersNamesJoined"></div>
+		</div>
+		<div class="modal-footer">
+			<a href="#!" class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
+		</div>
+	</div>
 	<footer class="page-footer white">
 		<div class="container footer-c">
 			<b>© 2020 - Peter Wu.</b><br><br>
