@@ -154,10 +154,18 @@ const Game = function (name, host) {
 			} else {
 				console.log('This stage of the round is INVALID!!');
 			}
-			this.startNewRound();
 		} else {
-
+			let currTurnIndex = 0;
+			for (let i = 0; i < this.players.length; i++) {
+				if (this.players[i].getStatus() == 'Their Turn') {
+					currTurnIndex = i;
+					this.players[i].setStatus('');
+				}
+			}
+			currTurnIndex = (currTurnIndex - 1 < 0) ? (this.players.length - 1) : (currTurnIndex - 1);
+			this.players[currTurnIndex].setStatus('Their Turn');
 		}
+		this.rerender();
 	}
 
 	this.isStageComplete = () => {
