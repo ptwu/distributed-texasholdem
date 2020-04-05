@@ -17,13 +17,16 @@ const Game = function (name, host) {
 	this.roundData = { 'bigBlind': '', 'smallBlind': '', 'turn': '', 'bets': [] };
 	this.community = [];
 	this.foldPot = 0;
+	this.bigBlindWent = false;
 	const constructor = function () {
 	}(this);
 
 	this.startNewRound = () => {
 		this.foldPot = 0;
+		this.bigBlindWent = false;
 		let bigBlindIndex, smallBlindIndex;
-		this.roundData.bets = [];
+		this.community = [];
+		this.roundData = { 'bigBlind': '', 'smallBlind': '', 'turn': '', 'bets': [] };
 		if (this.roundNum == 0) {
 			bigBlindIndex = Math.floor(Math.random() * this.players.length);
 			smallBlindIndex = (bigBlindIndex + 1 >= this.players.length) ? 0 : bigBlindIndex + 1;
@@ -37,6 +40,7 @@ const Game = function (name, host) {
 				} else {
 					this.players[i].setBlind('');
 				}
+				this.players[i].setStatus('');
 			}
 			const goFirstIndex = (bigBlindIndex - 1 < 0) ? (this.players.length - 1) : bigBlindIndex - 1;
 			this.roundData.bigBlind = bigBlindIndex;
@@ -56,11 +60,13 @@ const Game = function (name, host) {
 				} else {
 					this.players[i].setBlind('');
 				}
+				this.players[i].setStatus('');
 			}
 			this.roundData.bigBlind = bigBlindIndex;
 			this.roundData.smallBlind = smallBlindIndex;
-			this.roundData.turn = this.players[smallBlindIndex].getUsername();
-			this.players[smallBlindIndex].setStatus('Their Turn');
+			const goFirstIndex = (bigBlindIndex - 1 < 0) ? (this.players.length - 1) : bigBlindIndex - 1;
+			this.roundData.turn = this.players[goFirstIndex].getUsername();
+			this.players[goFirstIndex].setStatus('Their Turn');
 
 		}
 		// handle big and small blind initial forced bets
@@ -136,7 +142,6 @@ const Game = function (name, host) {
 	}
 
 	this.moveOntoNextPlayer = () => {
-		console.log(this.roundData.bets);
 		if (this.isStageComplete()) {
 			//check if everyone folded except one player
 			let numNonFolds = 0;
@@ -158,15 +163,37 @@ const Game = function (name, host) {
 				this.community.push(this.deck.dealRandomCard());
 				this.community.push(this.deck.dealRandomCard());
 				this.community.push(this.deck.dealRandomCard());
+				for (let i = 0; i < this.players.length; i++) {
+					if (i === this.roundData.smallBlind) {
+						this.players[i].setStatus('Their Turn');
+					} else {
+						this.players[i].setStatus('');
+					}
+				}
 				this.roundData.bets.push([]);
 			} else if (this.roundData.bets.length == 2) {
 				this.community.push(this.deck.dealRandomCard());
+				for (let i = 0; i < this.players.length; i++) {
+					if (i === this.roundData.smallBlind) {
+						this.players[i].setStatus('Their Turn');
+					} else {
+						this.players[i].setStatus('');
+					}
+				}
 				this.roundData.bets.push([]);
 			} else if (this.roundData.bets.length == 3) {
 				this.community.push(this.deck.dealRandomCard());
+				for (let i = 0; i < this.players.length; i++) {
+					if (i === this.roundData.smallBlind) {
+						this.players[i].setStatus('Their Turn');
+					} else {
+						this.players[i].setStatus('');
+					}
+				}
 				this.roundData.bets.push([]);
 			} else if (this.roundData.bets.length == 4) {
 				// TODO poker hand winner logic
+				this.revealCards();
 				this.startNewRound();
 			} else {
 				console.log('This stage of the round is INVALID!!');
@@ -185,9 +212,20 @@ const Game = function (name, host) {
 		this.rerender();
 	}
 
+	this.revealCards = () => {
+		console.log('revealll');
+	}
+
 	this.isStageComplete = () => {
 		const maxBet = this.getCurrentMaxBet();
-		return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) : true) && acc, true);
+		let allPlayersPresent = false;
+		if (this.roundData.bets.length == 1) {
+			allPlayersPresent = (this.roundData.bets[this.roundData.bets.length - 1].length == this.players.length) && this.bigBlindWent;
+		} else {
+			allPlayersPresent = this.roundData.bets[this.roundData.bets.length - 1].length == this.players.length;
+		}
+
+		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) : true) && acc, true);
 	}
 
 	this.setCardsPerPlayer = (numCards) => {

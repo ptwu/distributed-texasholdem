@@ -81,6 +81,32 @@ code {
   border: 5px solid yellow;
 }
 
+.playingCard_red_opponent {
+  float: left;
+  border: 5px solid black;
+  background-color: white;
+  border-radius: 5px;
+  height: 84px;
+  width: 60px;
+  color: red;
+  padding: 5px;
+  margin: 4px;
+  font-size: 20px;
+}
+
+.playingCard_black_opponent {
+  float: left;
+  border: 5px solid black;
+  background-color: white;
+  border-radius: 5px;
+  height: 84px;
+  width: 60px;
+  color: black;
+  padding: 5px;
+  margin: 4px;
+  font-size: 20px;
+}
+
 .blankCard {
   float: left;
   background: repeating-linear-gradient(
@@ -95,8 +121,7 @@ code {
   height: 84px;
   width: 60px;
   padding: 10px;
-  margin: 8px;
-  font-size: 5em;
+  margin: 4px;
 }
 
 .selected {
