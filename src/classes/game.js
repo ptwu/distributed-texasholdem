@@ -68,7 +68,7 @@ const Game = function (name, host) {
 		} else {
 			if (this.players[bigBlindIndex].money < 2) {
 				this.players[bigBlindIndex].money = 0;
-				this.players[bigBlindIndex].setStatus('All-In');
+				this.players[bigBlindIndex].allIn = true;
 				this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 1 }]);
 			} else {
 				this.players[bigBlindIndex].money = this.players[bigBlindIndex].money - 2;
@@ -80,15 +80,13 @@ const Game = function (name, host) {
 		} else if (this.players[smallBlindIndex].money == 1) {
 			this.players[smallBlindIndex].money = 0;
 			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: 1 });
-			this.players[smallBlindIndex].setStatus('All-In');
+			this.players[smallBlindIndex].allIn = true;
 		} else {
 			this.players[smallBlindIndex].money = this.players[smallBlindIndex].money - 1;
 			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: 1 });
 		}
 
 		this.roundNum++;
-		this.roundData.stageName = 'Pre-Flop';
-
 		this.rerender();
 	};
 
@@ -98,13 +96,13 @@ const Game = function (name, host) {
 			playersData.push({ 'username': this.players[pn].getUsername(), 'status': this.players[pn].getStatus(), 'blind': this.players[pn].getBlind(), 'money': this.players[pn].getMoney() })
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			this.players[pn].emit('rerender', { 'bets': this.roundData.bets, 'username': this.players[pn].getUsername(), 'round': this.roundNum, 'stage': this.getStageName(), 'pot': this.getCurrentPot(), 'players': playersData, 'myMoney': this.players[pn].getMoney(), 'myStatus': this.players[pn].getStatus(), 'myBlind': this.players[pn].getBlind() });
+			this.players[pn].emit('rerender', { 'community': this.community, 'bets': this.roundData.bets, 'username': this.players[pn].getUsername(), 'round': this.roundNum, 'stage': this.getStageName(), 'pot': this.getCurrentPot(), 'players': playersData, 'myMoney': this.players[pn].getMoney(), 'myStatus': this.players[pn].getStatus(), 'myBlind': this.players[pn].getBlind() });
 		}
 	}
 
 	this.getCurrentPot = () => {
 		if (this.roundData.bets == undefined || this.roundData.bets.length == 0) return 0;
-		else return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' || curr.bet == 'Fold') ? acc + curr.bet : acc + 0, 0);
+		else return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? acc + curr.bet : acc + 0, 0);
 	}
 
 	this.getStageName = () => {
@@ -122,13 +120,49 @@ const Game = function (name, host) {
 	}
 
 	this.moveOntoNextPlayer = () => {
-		if (this.status == 0) {
-			this.status = 1;
+		if (this.isStageComplete()) {
+			//check if everyone folded except one player
+			let numNonFolds = 0;
+			let nonFolderPlayer;
+			for (let i = 0; i < this.roundData.bets[this.roundData.bets.length - 1].length; i++) {
+				if (this.roundData.bets[this.roundData.bets.length - 1][i].bet != 'Fold') {
+					numNonFolds++;
+					nonFolderPlayer = this.roundData.bets[this.roundData.bets.length - 1][i].player;
+				}
+			}
+			if (numNonFolds == 1) {
+				// everyone folded, start new round, give pot to player
+				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
+				this.startNewRound();
+			}
 
-		} else {
-			this.status = 0;
+			// stage-by-stage logic.
+			if (this.roundData.bets.length == 1) {
+				this.community.push(this.deck.dealRandomCard());
+				this.community.push(this.deck.dealRandomCard());
+				this.community.push(this.deck.dealRandomCard());
+				this.roundData.bets.push([]);
+			} else if (this.roundData.bets.length == 2) {
+				this.community.push(this.deck.dealRandomCard());
+				this.roundData.bets.push([]);
+			} else if (this.roundData.bets.length == 3) {
+				this.community.push(this.deck.dealRandomCard());
+				this.roundData.bets.push([]);
+			} else if (this.roundData.bets.length == 4) {
+				// TODO poker hand winner logic
+				this.startNewRound();
+			} else {
+				console.log('This stage of the round is INVALID!!');
+			}
 			this.startNewRound();
+		} else {
+
 		}
+	}
+
+	this.isStageComplete = () => {
+		const maxBet = this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? Math.max(acc, curr.bet) : acc, 0);
+		return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) : true) && acc, true);
 	}
 
 	this.setCardsPerPlayer = (numCards) => {

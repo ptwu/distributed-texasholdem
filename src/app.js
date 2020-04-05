@@ -58,12 +58,16 @@ io.on('connection', (socket) => {
 		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game != undefined) {
 			if (data.move == 'fold') {
+				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player.socket.id == r.findPlayer(socket.id).socket.id ? { player: r.findPlayer(socket.id).getUsername(), bet: 'Fold' } : a);
 				game.moveOntoNextPlayer(game.findPlayer(socket.id));
 			} else if (data.move == 'check') {
+				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player.socket.id == r.findPlayer(socket.id).socket.id ? { player: r.findPlayer(socket.id).getUsername(), bet: 0 } : a);
 				game.moveOntoNextPlayer(game.findPlayer(socket.id));
 			} else if (data.move == 'call') {
+				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player.socket.id == r.findPlayer(socket.id).socket.id ? { player: r.findPlayer(socket.id).getUsername(), bet: data.bet } : a);
 				game.moveOntoNextPlayer(game.findPlayer(socket.id));
 			} else if (data.move == 'raise') {
+				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player.socket.id == r.findPlayer(socket.id).socket.id ? { player: r.findPlayer(socket.id).getUsername(), bet: data.bet } : a);
 				game.moveOntoNextPlayer(game.findPlayer(socket.id));
 			}
 		} else { console.log('ERROR: can\'t find game!!!'); }

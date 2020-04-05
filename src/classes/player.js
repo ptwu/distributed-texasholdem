@@ -7,7 +7,7 @@ const Player = function (playerName, socket) {
 	this.buyIns = 0;
 	this.status = '';
 	this.blindValue = '';
-	this.allInAmt = 0;
+	this.allIn = false;
 
 	const constructor = function () { }(this);
 

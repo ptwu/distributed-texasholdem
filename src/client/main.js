@@ -47,11 +47,12 @@ socket.on("joinRoom", function (data) {
 });
 
 socket.on("dealt", function (data) {
-	$('#mycards').html(data.cards.map(function (c, i) { return renderCard(c, i); }));
+	$('#mycards').html(data.cards.map(function (c) { return renderCard(c); }));
 	$('#usernamesCards').text(data.username + " - My Cards");
 });
 
 socket.on("rerender", function (data) {
+	if (data.community != undefined) $('#communityCards').html(data.community.map(function (c) { return renderCard(c); }));
 	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Pot: $" + data.pot);
 	$('#opponentCards').html(data.players.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets }) : '&nbsp;') }));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets });
@@ -96,19 +97,19 @@ var startGame = function (gameCode) {
 }
 
 var fold = function () {
-	socket.emit('moveMade', { move: 'fold' });
+	socket.emit('moveMade', { move: 'fold', bet: 'Fold' });
 }
 
 var call = function () {
-	socket.emit('moveMade', { move: 'call' });
+	socket.emit('moveMade', { move: 'call', bet: '10' });
 }
 
 var check = function () {
-	socket.emit('moveMade', { move: 'check' });
+	socket.emit('moveMade', { move: 'check', bet: 'Check' });
 }
 
 var raise = function () {
-	socket.emit('moveMade', { move: 'raise' });
+	socket.emit('moveMade', { move: 'raise', bet: '20' });
 }
 
 function renderCard(card) {
