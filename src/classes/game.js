@@ -2,6 +2,7 @@
 const Deck = require('./deck.js');
 const Player = require('./player.js');
 const Card = require('./card.js');
+const Hand = require('pokersolver').Hand;
 
 const Game = function (name, host) {
 	this.deck = new Deck();
@@ -15,11 +16,12 @@ const Game = function (name, host) {
 	this.roundNum = 0;
 	this.roundData = { 'bigBlind': '', 'smallBlind': '', 'turn': '', 'bets': [] };
 	this.community = [];
-
+	this.foldPot = 0;
 	const constructor = function () {
 	}(this);
 
 	this.startNewRound = () => {
+		this.foldPot = 0;
 		let bigBlindIndex, smallBlindIndex;
 		this.roundData.bets = [];
 		if (this.roundNum == 0) {
@@ -102,8 +104,22 @@ const Game = function (name, host) {
 
 	this.getCurrentPot = () => {
 		if (this.roundData.bets == undefined || this.roundData.bets.length == 0) return 0;
-		else return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? acc + curr.bet : acc + 0, 0);
+		else {
+			let sum = 0;
+			for (let i = 0; i < this.roundData.bets.length; i++) {
+				sum += this.roundData.bets[i].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? acc + curr.bet : acc + 0, 0);
+			}
+			return this.foldPot + sum;
+		}
 	}
+
+	this.getCurrentMaxBet = () => {
+		if (this.roundData.bets == undefined || this.roundData.bets.length == 0) return 0;
+		else {
+			return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? Math.max(acc, curr.bet) : acc, 0);
+		}
+	}
+
 
 	this.getStageName = () => {
 		if (this.roundData.bets.length == 1) {
@@ -120,6 +136,7 @@ const Game = function (name, host) {
 	}
 
 	this.moveOntoNextPlayer = () => {
+		console.log(this.roundData.bets);
 		if (this.isStageComplete()) {
 			//check if everyone folded except one player
 			let numNonFolds = 0;
@@ -169,7 +186,7 @@ const Game = function (name, host) {
 	}
 
 	this.isStageComplete = () => {
-		const maxBet = this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? Math.max(acc, curr.bet) : acc, 0);
+		const maxBet = this.getCurrentMaxBet();
 		return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) : true) && acc, true);
 	}
 
@@ -214,7 +231,7 @@ const Game = function (name, host) {
 				return a.compare(b);
 			});
 
-			this.players[pn].emit("dealt", { 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
+			this.players[pn].emit("dealt", { 'currBet': this.getCurrentMaxBet(), 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
 		}
 	};
 

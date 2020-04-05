@@ -8,6 +8,7 @@ const Player = function (playerName, socket) {
 	this.status = '';
 	this.blindValue = '';
 	this.allIn = false;
+	this.goAgainStatus = false;
 
 	const constructor = function () { }(this);
 

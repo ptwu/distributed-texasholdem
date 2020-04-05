@@ -53,7 +53,8 @@ socket.on("dealt", function (data) {
 
 socket.on("rerender", function (data) {
 	if (data.community != undefined) $('#communityCards').html(data.community.map(function (c) { return renderCard(c); }));
-	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Pot: $" + data.pot);
+	else $('#communityCards').html('<p></p>');
+	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Current Top Bet: " + data.currBet + "    |    Pot: $" + data.pot);
 	$('#opponentCards').html(data.players.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets }) : '&nbsp;') }));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets });
 });
@@ -147,6 +148,7 @@ function renderOpponent(name, data) {
 function renderSelf(data) {
 	$('#usernamesMoney').text("$" + data.money);
 	if (data.text != 'Their Turn') {
+		$("#status").text('');
 		$("#playerInformationCard").removeClass('theirTurn');
 		$("#usernameFold").prop('disabled', true);
 		$("#usernameCheck").prop('disabled', true);
