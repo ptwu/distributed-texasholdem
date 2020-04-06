@@ -91,7 +91,7 @@ code {
   color: red;
   padding: 5px;
   margin: 4px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .playingCard_black_opponent {
@@ -104,7 +104,7 @@ code {
   color: black;
   padding: 5px;
   margin: 4px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .blankCard {

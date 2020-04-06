@@ -50,6 +50,7 @@ const Game = function (name, host) {
 			//preflop left of big blind and then other stages are small blind
 			//then positions move to the left
 		} else {
+			this.emitPlayers("wait", {});
 			bigBlindIndex = (this.roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : this.roundData.bigBlind - 1;
 			smallBlindIndex = (this.roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : this.roundData.smallBlind - 1;
 			for (let i = 0; i < this.players.length; i++) {
@@ -154,8 +155,10 @@ const Game = function (name, host) {
 	}
 
 	this.moveOntoNextPlayer = () => {
+		let handOver = false;
 		console.log(this.roundData.bets[this.roundData.bets.length - 1]);
 		if (this.isStageComplete()) {
+			console.log('stage complete.');
 			// stage-by-stage logic.
 			// bigBlindWent = false;
 			if (this.roundData.bets.length == 1) {
@@ -192,6 +195,7 @@ const Game = function (name, host) {
 				this.roundData.bets.push([]);
 			} else if (this.roundData.bets.length == 4) {
 				// TODO poker hand winner logic
+				handOver = true;
 				this.revealCards();
 			} else {
 				console.log('This stage of the round is INVALID!!');
@@ -214,6 +218,7 @@ const Game = function (name, host) {
 				this.startNewRound();
 			} else {
 				let currTurnIndex = 0;
+
 				for (let i = 0; i < this.players.length; i++) {
 					if (this.players[i].getStatus() == 'Their Turn') {
 						currTurnIndex = i;
@@ -226,13 +231,19 @@ const Game = function (name, host) {
 				this.players[currTurnIndex].setStatus('Their Turn');
 			}
 		}
-		this.rerender();
+		if (!handOver) {
+			this.rerender();
+		}
 	}
 
 	this.revealCards = () => {
 		console.log('revealllllll');
+		let cardData = [];
+		for (let i = 0; i < this.players.length; i++) {
+			cardData.push({ 'username': this.players[i].getUsername(), 'cards': this.players[i].cards, 'folded': this.players[i].getStatus() == 'Fold', 'money': this.players[i].getMoney() });
+		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			this.emitPlayers('reveal', { 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards });
+			this.emitPlayers('reveal', { 'username': this.players[pn].getUsername(), 'cards': cardData, 'bets': this.roundData.bets });
 		}
 	}
 
