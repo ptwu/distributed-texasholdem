@@ -138,20 +138,21 @@ function renderOpponent(name, data) {
 				bet = arr[pn].bet;
 		}
 	}
-	if (data.bet == 'Fold') {
+	if (data.text == 'Fold') {
 		return '<div class="col s12 m2 opponentCard"><div class="card grey"><div class="card-content white-text"><span class="card-title">' + name + ' (Fold)</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
-	}
-	if (data.text == 'Their Turn') {
-		if (bet == 0) {
-			return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
-		} else {
-			return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
-		}
 	} else {
-		if (bet == 0) {
-			return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+		if (data.text == 'Their Turn') {
+			if (bet == 0) {
+				return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+			} else {
+				return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+			}
 		} else {
-			return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+			if (bet == 0) {
+				return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+			} else {
+				return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+			}
 		}
 	}
 }
@@ -167,7 +168,7 @@ function renderOpponentCards(name, data) {
 	}
 
 	if (bet != 'Fold') return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
-	else '<div class="col s12 m2 opponentCard"><div class="card grey" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+	else return '<div class="col s12 m2 opponentCard"><div class="card grey" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 }
 
 function renderOpponentCard(card) {
@@ -179,32 +180,36 @@ function renderOpponentCard(card) {
 
 function renderSelf(data) {
 	$('#usernamesMoney').text("$" + data.money);
-	if (data.text != 'Their Turn') {
-		$("#status").text('');
-		$("#playerInformationCard").removeClass('theirTurn');
-		$("#usernameFold").prop('disabled', true);
-		$("#usernameCheck").prop('disabled', true);
-		$("#usernameBet").prop('disabled', true);
-		$("#usernameCall").prop('disabled', true);
-		$("#usernameRaise").prop('disabled', true);
-	} else if (data.text == 'Fold') {
-		$("#status").text('Folded');
-		$("#playerInformationCard").removeClass('theirTurn');
-		Materialize.toast('You folded', 3000);
-		$("#usernameFold").prop('disabled', true);
-		$("#usernameCheck").prop('disabled', true);
-		$("#usernameBet").prop('disabled', true);
-		$("#usernameCall").prop('disabled', true);
-		$("#usernameRaise").prop('disabled', true);
-	} else {
+	if (data.text == 'Their Turn') {
+		$("#playerInformationCard").removeClass('grey');
+		$("#playerInformationCard").addClass('green');
 		$("#playerInformationCard").addClass('theirTurn');
 		$("#status").text('My Turn');
 		Materialize.toast('My Turn', 4000);
-		$("#usernameFold").prop('disabled', false);
-		$("#usernameCheck").prop('disabled', false);
-		$("#usernameBet").prop('disabled', false);
-		$("#usernameCall").prop('disabled', false);
-		$("#usernameRaise").prop('disabled', false);
+		$("#usernameFold").show();
+		$("#usernameCheck").show();
+		$("#usernameBet").show();
+		$("#usernameCall").show();
+		$("#usernameRaise").show();
+	} else if (data.text == 'Fold') {
+		$("#status").text('You Folded');
+		$("#playerInformationCard").removeClass('theirTurn');
+		$("#playerInformationCard").removeClass('green');
+		$("#playerInformationCard").addClass('grey');
+		Materialize.toast('You folded', 3000);
+		$("#usernameFold").hide();
+		$("#usernameCheck").hide();
+		$("#usernameBet").hide();
+		$("#usernameCall").hide();
+		$("#usernameRaise").hide();
+	} else {
+		$("#status").text('');
+		$("#playerInformationCard").removeClass('theirTurn');
+		$("#usernameFold").hide();
+		$("#usernameCheck").hide();
+		$("#usernameBet").hide();
+		$("#usernameCall").hide();
+		$("#usernameRaise").hide();
 	}
 	$('#blindStatus').text(data.blind);
 }

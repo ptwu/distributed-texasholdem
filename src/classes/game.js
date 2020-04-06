@@ -145,6 +145,7 @@ const Game = function (name, host) {
 		console.log(this.roundData.bets[this.roundData.bets.length - 1]);
 		if (this.isStageComplete()) {
 			// stage-by-stage logic.
+			// bigBlindWent = false;
 			if (this.roundData.bets.length == 1) {
 				this.community.push(this.deck.dealRandomCard());
 				this.community.push(this.deck.dealRandomCard());
@@ -152,7 +153,7 @@ const Game = function (name, host) {
 				for (let i = 0; i < this.players.length; i++) {
 					if (i === this.roundData.smallBlind) {
 						this.players[i].setStatus('Their Turn');
-					} else {
+					} else if (this.players[i].getStatus() !== 'Fold') {
 						this.players[i].setStatus('');
 					}
 				}
@@ -162,7 +163,7 @@ const Game = function (name, host) {
 				for (let i = 0; i < this.players.length; i++) {
 					if (i === this.roundData.smallBlind) {
 						this.players[i].setStatus('Their Turn');
-					} else {
+					} else if (this.players[i].getStatus() !== 'Fold') {
 						this.players[i].setStatus('');
 					}
 				}
@@ -172,7 +173,7 @@ const Game = function (name, host) {
 				for (let i = 0; i < this.players.length; i++) {
 					if (i === this.roundData.smallBlind) {
 						this.players[i].setStatus('Their Turn');
-					} else {
+					} else if (this.players[i].getStatus() !== 'Fold') {
 						this.players[i].setStatus('');
 					}
 				}
@@ -217,6 +218,7 @@ const Game = function (name, host) {
 	}
 
 	this.revealCards = () => {
+		console.log('revealllllll');
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.emitPlayers('reveal', { 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards });
 		}
@@ -225,10 +227,14 @@ const Game = function (name, host) {
 	this.isStageComplete = () => {
 		const maxBet = this.getCurrentMaxBet();
 		let allPlayersPresent = false;
+		let numUnfolded = 0;
+		for (let i = 0; i < this.players.length; i++) {
+			if (this.players[i].status != 'Fold') numUnfolded++;
+		}
 		if (this.roundData.bets.length == 1) {
-			allPlayersPresent = (this.roundData.bets[this.roundData.bets.length - 1].length == this.players.length) && this.bigBlindWent;
+			allPlayersPresent = (this.roundData.bets[this.roundData.bets.length - 1].length == numUnfolded) && this.bigBlindWent;
 		} else {
-			allPlayersPresent = this.roundData.bets[this.roundData.bets.length - 1].length == this.players.length;
+			allPlayersPresent = this.roundData.bets[this.roundData.bets.length - 1].length == numUnfolded;
 		}
 
 		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) : true) && acc, true);

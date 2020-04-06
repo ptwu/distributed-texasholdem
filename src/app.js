@@ -69,7 +69,11 @@ io.on('connection', (socket) => {
 				}
 				game.findPlayer(socket.id).setStatus('Fold');
 				game.foldPot = game.foldPot + preFoldBetAmount;
-				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: 'Fold' } : a);
+				if (game.roundData.bets[game.roundData.bets.length - 1].some(a => a.player == game.findPlayer(socket.id).username)) {
+					game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: 'Fold' } : a);
+				} else {
+					game.roundData.bets[game.roundData.bets.length - 1].push({ player: game.findPlayer(socket.id).getUsername(), bet: 'Fold' });
+				}
 				game.moveOntoNextPlayer();
 			} else if (data.move == 'check') {
 				let currBet = 0;
@@ -85,7 +89,9 @@ io.on('connection', (socket) => {
 				game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - data.bet;
 				game.moveOntoNextPlayer();
 			} else if (data.move == 'call') {
-				const currBet = game.roundData.bets[game.roundData.bets.length - 1].find(a => a.player == game.findPlayer(socket.id).username).bet;
+				let currBet;
+				if ((game.roundData.bets[game.roundData.bets.length - 1].find(a => a.player == game.findPlayer(socket.id).username)) != undefined)
+					currBet = game.roundData.bets[game.roundData.bets.length - 1].find(a => a.player == game.findPlayer(socket.id).username).bet;
 				if (currBet == undefined) {
 					game.roundData.bets[game.roundData.bets.length - 1].push({ player: game.findPlayer(socket.id).getUsername(), bet: game.getCurrentMaxBet() });
 					game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - game.getCurrentMaxBet();
