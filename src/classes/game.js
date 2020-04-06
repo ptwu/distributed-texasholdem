@@ -147,7 +147,7 @@ const Game = function (name, host) {
 			let index = this.roundData.smallBlind;
 			do {
 				index = (index - 1 < 0) ? (this.players.length - 1) : index - 1;
-			} while (this.players[this.roundData.smallBlind].getStatus == 'Fold');
+			} while (this.players[this.roundData.smallBlind].getStatus() == 'Fold');
 			return index;
 		} else {
 			return this.players[this.roundData.smallBlind];
