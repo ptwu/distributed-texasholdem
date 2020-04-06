@@ -1,4 +1,4 @@
-# Multiplayer Texas Hold 'Em
+# Multiplayer Texas Hold 'Em (wip)
 Using `socket.io`, `Node.js`, and `express` to make a distributed poker game.
 
 ## Commands
