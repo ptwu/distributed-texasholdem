@@ -64,13 +64,10 @@ io.on('connection', (socket) => {
 
 				for (let i = 0; i < game.roundData.bets.length; i++) {
 					let roundDataStage = game.roundData.bets[i].find(a => a.player == game.findPlayer(socket.id).username);
-					console.log('Stage ' + i + ' ' + roundDataStage);
 					if (roundDataStage != undefined && roundDataStage.bet != 'Fold') {
 						preFoldBetAmount += roundDataStage.bet;
 					}
 				}
-				console.log('Prefold Bet' + preFoldBetAmount);
-				console.log(game.foldPot);
 				game.findPlayer(socket.id).setStatus('Fold');
 				game.foldPot = game.foldPot + preFoldBetAmount;
 				if (game.roundData.bets[game.roundData.bets.length - 1].some(a => a.player == game.findPlayer(socket.id).username)) {
@@ -78,6 +75,7 @@ io.on('connection', (socket) => {
 				} else {
 					game.roundData.bets[game.roundData.bets.length - 1].push({ player: game.findPlayer(socket.id).getUsername(), bet: 'Fold' });
 				}
+				game.lastMoveParsed = { 'move': 'Fold', 'player': game.findPlayer(socket.id) };
 				game.moveOntoNextPlayer();
 			} else if (data.move == 'check') {
 				let currBet = 0;

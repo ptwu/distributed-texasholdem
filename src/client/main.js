@@ -52,6 +52,7 @@ socket.on("dealt", function (data) {
 });
 
 socket.on("rerender", function (data) {
+	console.log(JSON.stringify(data));
 	if (data.community != undefined) $('#communityCards').html(data.community.map(function (c) { return renderCard(c); }));
 	else $('#communityCards').html('<p></p>');
 	if (data.currBet == undefined) data.currBet = 0;

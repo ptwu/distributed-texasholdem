@@ -18,6 +18,8 @@ const Game = function (name, host) {
 	this.community = [];
 	this.foldPot = 0;
 	this.bigBlindWent = false;
+	this.lastMoveParsed = { 'move': '', 'player': '' };
+
 	const constructor = function () {
 	}(this);
 
@@ -143,14 +145,15 @@ const Game = function (name, host) {
 	}
 
 	this.findFirstToGoPlayer = () => {
+		console.log(this.roundData.smallBlind);
 		if (this.players[this.roundData.smallBlind].getStatus() == 'Fold') {
 			let index = this.roundData.smallBlind;
 			do {
 				index = (index - 1 < 0) ? (this.players.length - 1) : index - 1;
-			} while (this.players[this.roundData.smallBlind].getStatus() == 'Fold');
+			} while (this.players[index].getStatus() == 'Fold');
 			return index;
 		} else {
-			return this.players[this.roundData.smallBlind];
+			return this.roundData.smallBlind;
 		}
 	}
 
@@ -158,7 +161,6 @@ const Game = function (name, host) {
 		let handOver = false;
 		console.log(this.roundData.bets[this.roundData.bets.length - 1]);
 		if (this.isStageComplete()) {
-			console.log('stage complete.');
 			// stage-by-stage logic.
 			// bigBlindWent = false;
 			if (this.roundData.bets.length == 1) {
@@ -218,11 +220,21 @@ const Game = function (name, host) {
 				this.startNewRound();
 			} else {
 				let currTurnIndex = 0;
-
-				for (let i = 0; i < this.players.length; i++) {
-					if (this.players[i].getStatus() == 'Their Turn') {
-						currTurnIndex = i;
-						this.players[i].setStatus('');
+				//check if move just made was a fold
+				if (this.lastMoveParsed.move == 'Fold') {
+					for (let i = 0; i < this.players.length; i++) {
+						if (this.players[i].username == this.lastMoveParsed.player.username) {
+							currTurnIndex = i;
+							break;
+						}
+					}
+					this.lastMoveParsed = { 'move': '', 'player': '' };
+				} else {
+					for (let i = 0; i < this.players.length; i++) {
+						if (this.players[i].getStatus() == 'Their Turn') {
+							currTurnIndex = i;
+							this.players[i].setStatus('');
+						}
 					}
 				}
 				do {
@@ -232,6 +244,7 @@ const Game = function (name, host) {
 			}
 		}
 		if (!handOver) {
+			console.log('RERENDERING');
 			this.rerender();
 		}
 	}
@@ -243,7 +256,7 @@ const Game = function (name, host) {
 			cardData.push({ 'username': this.players[i].getUsername(), 'cards': this.players[i].cards, 'folded': this.players[i].getStatus() == 'Fold', 'money': this.players[i].getMoney() });
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			this.emitPlayers('reveal', { 'username': this.players[pn].getUsername(), 'cards': cardData, 'bets': this.roundData.bets });
+			this.players[pn].emit('reveal', { 'username': this.players[pn].getUsername(), 'cards': cardData, 'bets': this.roundData.bets });
 		}
 	}
 
