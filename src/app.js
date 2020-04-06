@@ -55,18 +55,22 @@ io.on('connection', (socket) => {
 	//precondition: user must be able to make the move in the first place.
 	socket.on('moveMade', (data) => {
 		//worst case complexity O(num_rooms * num_players_in_room)
-
 		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+
 		if (game != undefined) {
 			if (game.findPlayer(socket.id).blindValue == 'Big Blind' && game.roundData.bets.length == 1) game.bigBlindWent = true;
 			if (data.move == 'fold') {
 				let preFoldBetAmount = 0;
-				for (let i = 0; i < game.roundData.length; i++) {
-					let roundDataStage = game.roundData[i].find(a => a.player == game.findPlayer(socket.id).username);
-					if (roundDataStage != undefined) {
+
+				for (let i = 0; i < game.roundData.bets.length; i++) {
+					let roundDataStage = game.roundData.bets[i].find(a => a.player == game.findPlayer(socket.id).username);
+					console.log('Stage ' + i + ' ' + roundDataStage);
+					if (roundDataStage != undefined && roundDataStage.bet != 'Fold') {
 						preFoldBetAmount += roundDataStage.bet;
 					}
 				}
+				console.log('Prefold Bet' + preFoldBetAmount);
+				console.log(game.foldPot);
 				game.findPlayer(socket.id).setStatus('Fold');
 				game.foldPot = game.foldPot + preFoldBetAmount;
 				if (game.roundData.bets[game.roundData.bets.length - 1].some(a => a.player == game.findPlayer(socket.id).username)) {

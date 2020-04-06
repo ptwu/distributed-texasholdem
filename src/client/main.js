@@ -204,6 +204,8 @@ function renderSelf(data) {
 		$("#usernameRaise").hide();
 	} else {
 		$("#status").text('');
+		$("#playerInformationCard").removeClass('grey');
+		$("#playerInformationCard").addClass('green');
 		$("#playerInformationCard").removeClass('theirTurn');
 		$("#usernameFold").hide();
 		$("#usernameCheck").hide();
