@@ -107,7 +107,19 @@ const Game = function (name, host) {
 			playersData.push({ 'username': this.players[pn].getUsername(), 'status': this.players[pn].getStatus(), 'blind': this.players[pn].getBlind(), 'money': this.players[pn].getMoney() })
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			this.players[pn].emit('rerender', { 'community': this.community, 'bets': this.roundData.bets, 'username': this.players[pn].getUsername(), 'round': this.roundNum, 'stage': this.getStageName(), 'pot': this.getCurrentPot(), 'players': playersData, 'myMoney': this.players[pn].getMoney(), 'myStatus': this.players[pn].getStatus(), 'myBlind': this.players[pn].getBlind() });
+			this.players[pn].emit('rerender', {
+				'community': this.community,
+				'topBet': this.getCurrentTopBet(),
+				'bets': this.roundData.bets,
+				'username': this.players[pn].getUsername(),
+				'round': this.roundNum,
+				'stage': this.getStageName(),
+				'pot': this.getCurrentPot(),
+				'players': playersData,
+				'myMoney': this.players[pn].getMoney(),
+				'myStatus': this.players[pn].getStatus(),
+				'myBlind': this.players[pn].getBlind()
+			});
 		}
 	}
 
@@ -126,6 +138,30 @@ const Game = function (name, host) {
 		if (this.roundData.bets == undefined || this.roundData.bets.length == 0) return 0;
 		else {
 			return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? Math.max(acc, curr.bet) : acc, 0);
+		}
+	}
+
+	this.getPlayerBetInStage = (player) => {
+		if (this.roundData.bets == undefined || this.roundData.bets.length == 0 ||
+			this.roundData.bets[this.roundData.bets.length - 1] == undefined) return 0;
+		const stageData = this.roundData.bets[this.roundData.bets.length - 1];
+		let totalBetInStage = 0;
+
+		for (let j = 0; j < stageData.length; j++) {
+			if (stageData[j].player == player.getUsername() && stageData[j].bet != 'Buy-in' && stageData[j].bet != 'Fold')
+				totalBetInStage += stageData[j].bet;
+		}
+		return totalBetInStage;
+	}
+
+	this.getCurrentTopBet = () => {
+		if (this.roundData.bets == undefined || this.roundData.bets.length == 0) return 0;
+		else {
+			let maxBet = 0;
+			for (let i = 0; i < this.players.length; i++) {
+				maxBet = Math.max(maxBet, this.getPlayerBetInStage(this.players[i]));
+			}
+			return maxBet;
 		}
 	}
 
@@ -317,7 +353,7 @@ const Game = function (name, host) {
 				return a.compare(b);
 			});
 
-			this.players[pn].emit("dealt", { 'currBet': this.getCurrentMaxBet(), 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
+			this.players[pn].emit("dealt", { 'currBet': this.getCurrentTopBet(), 'username': this.players[pn].getUsername(), 'cards': this.players[pn].cards, 'players': this.players.map((p) => { return p.username; }) });
 		}
 	};
 

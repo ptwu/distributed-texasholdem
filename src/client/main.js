@@ -56,7 +56,7 @@ socket.on("rerender", function (data) {
 	if (data.community != undefined) $('#communityCards').html(data.community.map(function (c) { return renderCard(c); }));
 	else $('#communityCards').html('<p></p>');
 	if (data.currBet == undefined) data.currBet = 0;
-	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Current Top Bet: $" + data.currBet + "    |    Pot: $" + data.pot);
+	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Current Top Bet: $" + data.topBet + "    |    Pot: $" + data.pot);
 	$('#opponentCards').html(data.players.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets }) : '&nbsp;') }));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets });
 });
@@ -112,7 +112,11 @@ var fold = function () {
 }
 
 var bet = function () {
-
+	if (parseInt($("#betRangeSlider").val()) == 0) {
+		Materialize.toast('You must bet more than $0! Try again.', 4000);
+	} else {
+		socket.emit('moveMade', { move: 'bet', bet: parseInt($("#betRangeSlider").val()) });
+	}
 }
 
 var call = function () {
@@ -180,6 +184,19 @@ function renderOpponentCard(card) {
 		return '<div class="playingCard_black_opponent" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';
 	else
 		return '<div class="playingCard_red_opponent" id="card"' + card.value + card.suit + '" data-value="' + card.value + " " + card.suit + '">' + card.value + " " + card.suit + '</div>';
+}
+
+function updateBetDisplay() {
+	$('#betDisplay').html('<h3 class="center-align">$' + $("#betRangeSlider").val() + '</h36>')
+}
+
+function updateBetModal() {
+	var usernamesMoneyStr = $('#usernamesMoney').text().replace('$', '');
+	var usernamesMoneyNum = parseInt(usernamesMoneyStr);
+	$("#betRangeSlider").attr({
+		"max": usernamesMoneyNum,
+		"min": 0
+	});
 }
 
 function renderSelf(data) {

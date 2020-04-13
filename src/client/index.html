@@ -29,7 +29,8 @@
 						<br />
 						<button onClick=check() id="usernameCheck" class="btn white black-text menuButtons">Check</button>
 						<br />
-						<button onClick=bet() id="usernameBet" class="btn white black-text menuButtons">Bet</button>
+						<button href="#betModal" onClick=updateBetModal() id="usernameBet"
+							class="btn white black-text modal-trigger menuButtons">Bet</button>
 						<br />
 						<button onClick=call() id="usernameCall" class="btn white black-text menuButtons">Call</button>
 						<br />
@@ -120,18 +121,18 @@
 		<div class="modal-content">
 			<h4>Bet</h4>
 			<div id="joinModalContent">
-				<p>Enter the your name and the code provided by the host to join their room:</p>
-				<div class="input-field col s12">
-					<label for="name">Name</label>
-					<input type="text" name="name" id="joinName-field" required="required" />
-				</div>
-				<div class="input-field col s12">
-					<label for="code">Code</label>
-					<input type="text" name="code" id="code-field" required="required" />
-				</div>
-				<button onclick=joinRoom() type="submit"
-					class="waves-effect waves-light indigo darken-3 white-text btn-flat">Join
-					Game</button>
+				<form action="#">
+					<div id="betDisplay">
+						<h4>Drag the slider to place your bet!</h4>
+					</div>
+					<p class="range-field">
+						<input type="range" id="betRangeSlider" min="0" max="100" value="0" onchange=updateBetDisplay() />
+					</p>
+				</form>
+				<br />
+				<button onclick=bet() type="submit"
+					class="modal-close waves-effect waves-light indigo darken-3 white-text btn-flat">Confirm
+					Bet</button>
 			</div>
 			<div id="playersNamesJoined"></div>
 		</div>

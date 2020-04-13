@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
 			game.emitPlayers('hostRoom', { 'code': data.code, 'players': game.getPlayersArray() })
 		}
 	});
-
+	
 	socket.on('startGame', (data) => {
 		let game = rooms.find(r => r.getCode() == data.code);
 		if (game == undefined) {
