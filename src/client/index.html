@@ -34,7 +34,8 @@
 						<br />
 						<button onClick=call() id="usernameCall" class="btn white black-text menuButtons">Call</button>
 						<br />
-						<button onClick=raise() id="usernameRaise" class="btn white black-text menuButtons">Raise</button>
+						<button href="#raiseModal" onClick=updateRaiseModal() id="usernameRaise"
+							class="btn white black-text modal-trigger menuButtons">Raise</button>
 					</div>
 				</div>
 			</div>
@@ -120,25 +121,45 @@
 	<div id="betModal" class="modal">
 		<div class="modal-content">
 			<h4>Bet</h4>
-			<div id="joinModalContent">
-				<form action="#">
-					<div id="betDisplay">
-						<h4>Drag the slider to place your bet!</h4>
-					</div>
-					<p class="range-field">
-						<input type="range" id="betRangeSlider" min="0" max="100" value="0" onchange=updateBetDisplay() />
-					</p>
-				</form>
-				<br />
-				<button onclick=bet() type="submit"
-					class="modal-close waves-effect waves-light indigo darken-3 white-text btn-flat">Confirm
-					Bet</button>
-			</div>
-			<div id="playersNamesJoined"></div>
+			<form action="#">
+				<div id="betDisplay">
+					<h4>Drag the slider to place your bet!</h4>
+				</div>
+				<p class="range-field">
+					<input type="range" id="betRangeSlider" min="0" max="100" value="0" onchange=updateBetDisplay() />
+				</p>
+			</form>
+			<br />
+			<button onclick=bet() type="submit"
+				class="modal-close waves-effect waves-light indigo darken-3 white-text btn-flat">Confirm
+				Bet</button>
 		</div>
-		<div class="modal-footer">
-			<a href="#!" class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
+	</div>
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
+	</div>
+	</div>
+
+	<div id="raiseModal" class="modal">
+		<div class="modal-content">
+			<h4>Raise</h4>
+			<form action="#">
+				<div id="raiseDisplay">
+					<h4>Drag the slider to raise the current top bet!</h4>
+				</div>
+				<p class="range-field">
+					<input type="range" id="raiseRangeSlider" min="0" max="100" value="0" onchange=updateRaiseDisplay() />
+				</p>
+			</form>
+			<br />
+			<button onclick=raise() type="submit"
+				class="modal-close waves-effect waves-light indigo darken-3 white-text btn-flat">Confirm
+				Raise</button>
 		</div>
+	</div>
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-light btn-flat">CLOSE</a>
+	</div>
 	</div>
 	<footer class="page-footer white">
 		<div class="container footer-c">

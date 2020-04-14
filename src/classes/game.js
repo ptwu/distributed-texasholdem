@@ -117,6 +117,7 @@ const Game = function (name, host) {
 				'pot': this.getCurrentPot(),
 				'players': playersData,
 				'myMoney': this.players[pn].getMoney(),
+				'myBet': this.getPlayerBetInStage(this.players[pn]),
 				'myStatus': this.players[pn].getStatus(),
 				'myBlind': this.players[pn].getBlind()
 			});
@@ -131,13 +132,6 @@ const Game = function (name, host) {
 				sum += this.roundData.bets[i].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? acc + curr.bet : acc + 0, 0);
 			}
 			return this.foldPot + sum;
-		}
-	}
-
-	this.getCurrentMaxBet = () => {
-		if (this.roundData.bets == undefined || this.roundData.bets.length == 0) return 0;
-		else {
-			return this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => (curr.bet != 'Buy-in' && curr.bet != 'Fold') ? Math.max(acc, curr.bet) : acc, 0);
 		}
 	}
 
@@ -297,7 +291,7 @@ const Game = function (name, host) {
 	}
 
 	this.isStageComplete = () => {
-		const maxBet = this.getCurrentMaxBet();
+		const maxBet = this.getCurrentTopBet();
 		let allPlayersPresent = false;
 		let numUnfolded = 0;
 		for (let i = 0; i < this.players.length; i++) {

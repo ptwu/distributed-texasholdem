@@ -9,7 +9,6 @@ var gameInfo = null;
 
 socket.on("hostRoom", function (data) {
 	if (data != undefined) {
-
 		if (data.players.length >= 11) {
 			$('#hostModalContent').html('<h5>Code:</h5><code>' + data.code + '</code><br /><h5>Warning: you have too many players in your room. Max is 11.</h5><h5>Players Currently in My Room</h5>');
 			$('#playersNames').html(data.players.map(function (p) {
@@ -53,6 +52,11 @@ socket.on("dealt", function (data) {
 
 socket.on("rerender", function (data) {
 	console.log(JSON.stringify(data));
+	if (data.myBet == 0) {
+		$('#usernamesCards').text(data.username + " - My Cards");
+	} else {
+		$('#usernamesCards').text(data.username + " - My Bet: $" + data.myBet);
+	}
 	if (data.community != undefined) $('#communityCards').html(data.community.map(function (c) { return renderCard(c); }));
 	else $('#communityCards').html('<p></p>');
 	if (data.currBet == undefined) data.currBet = 0;
@@ -120,7 +124,7 @@ var bet = function () {
 }
 
 var call = function () {
-	socket.emit('moveMade', { move: 'call', bet: '10' });
+	socket.emit('moveMade', { move: 'call', bet: 'Call' });
 }
 
 var check = function () {
@@ -141,7 +145,7 @@ function renderCard(card) {
 function renderOpponent(name, data) {
 	var bet = 0;
 	if (data.bets != undefined) {
-		var arr = data.bets[data.bets.length - 1].reverse();
+		var arr = data.bets[data.bets.length - 1];
 		for (var pn = 0; pn < arr.length; pn++) {
 			if (arr[pn].player == name)
 				bet = arr[pn].bet;
@@ -197,6 +201,21 @@ function updateBetModal() {
 		"max": usernamesMoneyNum,
 		"min": 0
 	});
+}
+
+function updateRaiseDisplay() {
+	$('#raiseDisplay').html('<h3 class="center-align">Raise top bet to $' + $("#raiseRangeSlider").val() + '</h36>')
+}
+
+socket.on("updateRaiseModal", function (data) {
+	$("#betRangeSlider").attr({
+		"max": data.usernameMoney,
+		"min": data.topBet
+	});
+});
+
+function updateRaiseModal() {
+	socket.emit('raiseModalData', {});
 }
 
 function renderSelf(data) {
