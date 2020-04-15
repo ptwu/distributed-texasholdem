@@ -80,7 +80,9 @@ socket.on("gameBegin", function (data) {
 });
 
 socket.on("reveal", function (data) {
-	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money }) : '&nbsp;') }));
+	$('#table-title').text('Hand Winner(s): ' + data.winners);
+	$('#blindStatus').text(data.hand);
+	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand }) : '&nbsp;') }));
 });
 
 var beginHost = function () {
@@ -184,7 +186,7 @@ function renderOpponentCards(name, data) {
 		}
 	}
 	if (data.folded) return '<div class="col s12 m2 opponentCard"><div class="card grey" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br /><br /></p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
-	else return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br /><br /></p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+	else return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"> ' + renderOpponentCard(data.cards[0]) + renderOpponentCard(data.cards[1]) + ' </div><br /><br /><br /><br /><br />' + data.endHand + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 }
 
 function renderOpponentCard(card) {

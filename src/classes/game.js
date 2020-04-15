@@ -235,7 +235,7 @@ const Game = function (name, host) {
 				for (winner of roundResults.winnerData) {
 					winningPlayers.push(winner.player.getUsername());
 				}
-				this.revealCards();
+				this.revealCards(winningPlayers);
 			} else {
 				console.log('This stage of the round is INVALID!!');
 			}
@@ -347,14 +347,26 @@ const Game = function (name, host) {
 		return res;
 	}
 
-	this.revealCards = () => {
+	this.revealCards = (winnersUsernames) => {
 		console.log('revealllllll');
 		let cardData = [];
 		for (let i = 0; i < this.players.length; i++) {
-			cardData.push({ 'username': this.players[i].getUsername(), 'cards': this.players[i].cards, 'folded': this.players[i].getStatus() == 'Fold', 'money': this.players[i].getMoney() });
+			cardData.push({
+				'username': this.players[i].getUsername(),
+				'cards': this.players[i].cards,
+				'hand': this.players[i].getStatus(),
+				'folded': this.players[i].getStatus() == 'Fold',
+				'money': this.players[i].getMoney()
+			});
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			this.players[pn].emit('reveal', { 'username': this.players[pn].getUsername(), 'cards': cardData, 'bets': this.roundData.bets });
+			this.players[pn].emit('reveal', {
+				'username': this.players[pn].getUsername(),
+				'cards': cardData,
+				'bets': this.roundData.bets,
+				'winners': winnersUsernames.toString(),
+				'hand': this.players[pn].getStatus()
+			});
 		}
 	}
 
