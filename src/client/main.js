@@ -222,6 +222,22 @@ function updateRaiseModal() {
 	socket.emit('raiseModalData', {});
 }
 
+socket.on("displayPossibleMoves", function (data) {
+	if (data.fold == 'yes') $("#usernameFold").show();
+	else $("#usernameHide").hide();
+	if (data.check == 'yes') $("#usernameCheck").show();
+	else $("#usernameCheck").hide();
+	if (data.bet == 'yes') $("#usernameBet").show();
+	else $("#usernameBet").hide();
+	if (data.call == 'yes' || data.call == 'all-in') {
+		$("#usernameCall").show();
+		if (data.call == 'all-in') $("#usernameCall").text('Call All-In');
+		else $("#usernameCall").text('Call')
+	} else $("#usernameCall").hide();
+	if (data.raise == 'yes') $("#usernameRaise").show();
+	else $("#usernameRaise").hide();
+});
+
 function renderSelf(data) {
 	$('#usernamesMoney').text("$" + data.money);
 	if (data.text == 'Their Turn') {
@@ -230,11 +246,7 @@ function renderSelf(data) {
 		$("#playerInformationCard").addClass('theirTurn');
 		$("#status").text('My Turn');
 		Materialize.toast('My Turn', 4000);
-		$("#usernameFold").show();
-		$("#usernameCheck").show();
-		$("#usernameBet").show();
-		$("#usernameCall").show();
-		$("#usernameRaise").show();
+		socket.emit('evaluatePossibleMoves', {});
 	} else if (data.text == 'Fold') {
 		$("#status").text('You Folded');
 		$("#playerInformationCard").removeClass('theirTurn');

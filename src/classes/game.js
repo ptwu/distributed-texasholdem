@@ -226,8 +226,15 @@ const Game = function (name, host) {
 				}
 				this.roundData.bets.push([]);
 			} else if (this.roundData.bets.length == 4) {
-				// TODO poker hand winner logic
 				handOver = true;
+				const roundResults = this.evaluateWinners();
+				for (playerResult of roundResults.playersData) {
+					playerResult.player.setStatus(playerResult.hand.name);
+				}
+				let winningPlayers = [];
+				for (winner of roundResults.winnerData) {
+					winningPlayers.push(winner.player.getUsername());
+				}
 				this.revealCards();
 			} else {
 				console.log('This stage of the round is INVALID!!');
@@ -277,6 +284,67 @@ const Game = function (name, host) {
 			console.log('RERENDERING');
 			this.rerender();
 		}
+	}
+
+	this.evaluateWinners = () => {
+		let handArray = [];
+		let playerArray = [];
+		for (let i = 0; i < this.players.length; i++) {
+			if (this.players[i].getStatus() != 'Fold') {
+				let h = Hand.solve(this.convertCardsFormat(this.players[i].cards.concat(this.community)));
+				handArray.push(h);
+				playerArray.push({ player: this.players[i], hand: h });
+			}
+		}
+		const winners = Hand.winners(handArray);
+
+		let winnerData = [];
+		if (Array.isArray(winners)) {
+			for (winner of winners) {
+				for (playerHand of playerArray) {
+					let winnerArray = winner.toString().split(', ');
+					if (this.arraysEqual(playerHand.hand.cards.sort(), winnerArray.sort())) {
+						winnerData.push({ player: playerHand.player, handTitle: playerHand.hand.name });
+						break;
+					}
+				}
+			}
+		} else {
+			console.log('fatal error: winner cannot be calculated');
+		}
+		const res = { winnerData: winnerData, playersData: playerArray };
+		return res;
+	}
+
+	this.arraysEqual = (a, b) => {
+		if (a === b) return true;
+		if (a == null || b == null) return false;
+		if (a.length != b.length) return false;
+
+		for (let i = 0; i < a.length; ++i) {
+			if (a[i] != b[i]) return false;
+		}
+		return true;
+	}
+
+	this.convertCardsFormat = (arr) => {
+		let res = [];
+		for (let i = 0; i < arr.length; i++) {
+			let str = '';
+			let value = arr[i].getValue();
+			let suit = arr[i].getSuit();
+			if (value == 10) {
+				str += 'T';
+			} else {
+				str += value.toString();
+			}
+			if (suit == '♠') str += 's';
+			else if (suit == '♥') str += 'h';
+			else if (suit == '♦') str += 'd';
+			else if (suit == '♣') str += 'c';
+			res.push(str);
+		}
+		return res;
 	}
 
 	this.revealCards = () => {

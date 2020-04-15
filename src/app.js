@@ -1,4 +1,4 @@
-// server-side socket.io event handling
+// server-side socket.io backend event handling
 const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
@@ -50,6 +50,31 @@ io.on('connection', (socket) => {
 			game.emitPlayers('gameBegin', { 'code': data.code });
 			game.startGame();
 		}
+	});
+
+	socket.on('evaluatePossibleMoves', () => {
+		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		const player = game.findPlayer(socket.id);
+		const playerBet = game.getPlayerBetInStage(player);
+		const topBet = game.getCurrentTopBet();
+		let possibleMoves = { fold: 'yes', check: 'yes', bet: 'yes', call: 'yes', raise: 'yes' }
+		if (player.getStatus() == 'Fold') {
+			console.log('Error: Folded players should not be able to move.');
+		}
+		if (topBet != 0) {
+			possibleMoves.bet = 'no';
+			if (player.blindValue != 'Big Blind' && !game.bigBlindWent) possibleMoves.check = 'no';
+		} else {
+			possibleMoves.raise = 'no';
+		}
+		if (topBet <= playerBet) {
+			possibleMoves.call = 'no';
+		}
+		if (topBet > player.getMoney() + playerBet) {
+			possibleMoves.raise = 'no';
+			possibleMoves.call = 'all-in';
+		}
+		socket.emit('displayPossibleMoves', possibleMoves);
 	});
 
 	socket.on('raiseModalData', () => {
