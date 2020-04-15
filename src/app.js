@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('raiseModalData', () => {
-		let game = rooms.find(r => r.getCode() == data.code);
+		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game != undefined) {
 			socket.emit('updateRaiseModal', {
 				'topBet': game.getCurrentTopBet(),
@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
 				const topBet = game.getCurrentTopBet();
 				console.log('current bet: ' + currBet);
 				console.log('top bet: ' + topBet);
-				if (currBet === undefined || currBet === 0) {
+				if (currBet === 0) {
 					game.roundData.bets[game.roundData.bets.length - 1].push({
 						player: game.findPlayer(socket.id).getUsername(),
 						bet: topBet
@@ -118,8 +118,13 @@ io.on('connection', (socket) => {
 				}
 			} else if (data.move == 'raise') {
 				const currBet = game.getPlayerBetInStage(game.findPlayer(socket.id));
-				game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: data.bet } : a);
-				game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - (data.bet - currBet);
+				if (currBet === 0) {
+					game.roundData.bets[game.roundData.bets.length - 1].push({ player: game.findPlayer(socket.id).getUsername(), bet: data.bet });
+					game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - data.bet;
+				} else {
+					game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: data.bet } : a);
+					game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - (data.bet - currBet);
+				}
 				game.moveOntoNextPlayer();
 			}
 		} else { console.log('ERROR: can\'t find game!!!'); }

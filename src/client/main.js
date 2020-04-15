@@ -132,7 +132,11 @@ var check = function () {
 }
 
 var raise = function () {
-	socket.emit('moveMade', { move: 'raise', bet: '20' });
+	if (parseInt($("#raiseRangeSlider").val()) == $("#raiseRangeSlider").prop('min')) {
+		Materialize.toast('You must raise higher than the current top bet! Try again.', 4000);
+	} else {
+		socket.emit('moveMade', { move: 'raise', bet: parseInt($("#raiseRangeSlider").val()) });
+	}
 }
 
 function renderCard(card) {
@@ -204,11 +208,11 @@ function updateBetModal() {
 }
 
 function updateRaiseDisplay() {
-	$('#raiseDisplay').html('<h3 class="center-align">Raise top bet to $' + $("#raiseRangeSlider").val() + '</h36>')
+	$('#raiseDisplay').html('<h3 class="center-align">Raise top bet to $' + $("#raiseRangeSlider").val() + '</h3>')
 }
 
 socket.on("updateRaiseModal", function (data) {
-	$("#betRangeSlider").attr({
+	$("#raiseRangeSlider").attr({
 		"max": data.usernameMoney,
 		"min": data.topBet
 	});
