@@ -191,6 +191,36 @@ const Game = function (name, host) {
 		let handOver = false;
 		console.log(this.roundData.bets[this.roundData.bets.length - 1]);
 		if (this.isStageComplete()) {
+			if (this.allPlayersAllIn()) {
+				console.log(' all players all in');
+				if (this.roundData.bets.length == 1) {
+					this.community.push(this.deck.dealRandomCard());
+					this.community.push(this.deck.dealRandomCard());
+					this.community.push(this.deck.dealRandomCard());
+					this.roundData.bets.push([]);
+				}
+				if (this.roundData.bets.length == 2) {
+					this.community.push(this.deck.dealRandomCard());
+					this.roundData.bets.push([]);
+				}
+				if (this.roundData.bets.length == 3) {
+					this.community.push(this.deck.dealRandomCard());
+					this.roundData.bets.push([]);
+					this.rerender();
+				} if (this.roundData.bets.length == 4) {
+					handOver = true;
+					const roundResults = this.evaluateWinners();
+					for (playerResult of roundResults.playersData) {
+						playerResult.player.setStatus(playerResult.hand.name);
+					}
+					let winningPlayers = [];
+					for (winner of roundResults.winnerData) {
+						winningPlayers.push(winner.player);
+					}
+					this.distributeMoney(winningPlayers);
+					this.revealCards(winningPlayers.map(a => a.getUsername()));
+				}
+			}
 			// stage-by-stage logic.
 			// bigBlindWent = false;
 			if (this.roundData.bets.length == 1) {
@@ -233,9 +263,11 @@ const Game = function (name, host) {
 				}
 				let winningPlayers = [];
 				for (winner of roundResults.winnerData) {
-					winningPlayers.push(winner.player.getUsername());
+					winningPlayers.push(winner.player);
 				}
-				this.revealCards(winningPlayers);
+				this.distributeMoney(winningPlayers);
+				this.revealCards(winningPlayers.map(a => a.getUsername()));
+
 			} else {
 				console.log('This stage of the round is INVALID!!');
 			}
@@ -276,13 +308,210 @@ const Game = function (name, host) {
 				}
 				do {
 					currTurnIndex = (currTurnIndex - 1 < 0) ? (this.players.length - 1) : (currTurnIndex - 1)
-				} while (this.players[currTurnIndex].getStatus() == 'Fold');
+				} while (this.players[currTurnIndex].getStatus() == 'Fold' || this.players[currTurnIndex].allIn);
 				this.players[currTurnIndex].setStatus('Their Turn');
 			}
 		}
 		if (!handOver) {
 			console.log('RERENDERING');
 			this.rerender();
+		}
+	}
+
+	this.getPlayerBetInStageNum = (player, stageNum) => {
+		if (this.roundData.bets == undefined || this.roundData.bets.length == 0 ||
+			this.roundData.bets[stageNum - 1] == undefined) return 0;
+		const stageData = this.roundData.bets[stageNum - 1];
+		let totalBetInStage = 0;
+
+		for (let j = 0; j < stageData.length; j++) {
+			if (stageData[j].player == player.getUsername() && stageData[j].bet != 'Buy-in' && stageData[j].bet != 'Fold')
+				totalBetInStage += stageData[j].bet;
+		}
+		return totalBetInStage;
+	}
+
+	this.getTotalBetsInStageNum = (stageNum) => {
+		if (this.roundData.bets == undefined || this.roundData.bets.length == 0 ||
+			this.roundData.bets[stageNum - 1] == undefined) return 0;
+		const stageData = this.roundData.bets[stageNum - 1];
+		let totalBetInStage = 0;
+
+		for (let j = 0; j < stageData.length; j++) {
+			if (stageData[j].bet != 'Buy-in' && stageData[j].bet != 'Fold')
+				totalBetInStage += stageData[j].bet;
+		}
+		return totalBetInStage;
+	}
+
+	this.distributeMoney = (winners) => {
+		const numWinners = winners.length;
+		const pot = this.getCurrentPot();
+		const potEligible = Math.floor(pot / numWinners);
+		for (winner of winners) {
+			if (winner.allIn || winner.getMoney() == 0) {
+				// calculate what all-in player is eligible for (side pot calculation).
+				// returns money to players
+				let sidepot1 = [];
+				let sidepot2 = [];
+				let sidepot3 = [];
+				let sidepot4 = [];
+				for (let i = 0; i < 4; i++) {
+					// might? cause issues look into later
+					this.roundData.bets[i] = this.roundData.bets[i].filter(a => typeof parseInt(a.bet) == 'number');
+					this.roundData.bets[i].sort((a, b) => a.bet - b.bet);
+				}
+				for (let i = 0; i < this.roundData.bets[0].length; i++) {
+					if (sidepot1.some(a => this.roundData.bets[0][i].bet == a.bet)) {
+						for (let j = 0; j < sidepot1.length; j++) {
+							if (sidepot1[j].bet == this.roundData.bets[0][i].bet) {
+								let pot = sidepot1[j];
+								pot.players.push(this.roundData.bets[0][i].player);
+								sidepot1[j] = pot;
+							}
+						}
+					} else {
+						sidepot1.push({ bet: this.roundData.bets[0][i].bet, players: [this.roundData.bets[0][i].player] })
+					}
+				}
+				for (let i = 0; i < this.roundData.bets[1].length; i++) {
+					if (sidepot2.some(a => this.roundData.bets[1][i].bet == a.bet)) {
+						for (let j = 0; j < sidepot2.length; j++) {
+							if (sidepot2[j].bet == this.roundData.bets[1][i].bet) {
+								let pot = sidepot2[j];
+								pot.players.push(this.roundData.bets[1][i].player);
+								sidepot2[j] = pot;
+							}
+						}
+					} else {
+						sidepot2.push({ bet: this.roundData.bets[1][i].bet, players: [this.roundData.bets[1][i].player] })
+					}
+				}
+				for (let i = 0; i < this.roundData.bets[2].length; i++) {
+					if (sidepot3.some(a => this.roundData.bets[2][i].bet == a.bet)) {
+						for (let j = 0; j < sidepot3.length; j++) {
+							if (sidepot3[j].bet == this.roundData.bets[2][i].bet) {
+								let pot = sidepot3[j];
+								pot.players.push(this.roundData.bets[2][i].player);
+								sidepot3[j] = pot;
+							}
+						}
+					} else {
+						sidepot3.push({ bet: this.roundData.bets[2][i].bet, players: [this.roundData.bets[2][i].player] })
+					}
+				}
+				for (let i = 0; i < this.roundData.bets[3].length; i++) {
+					if (sidepot4.some(a => this.roundData.bets[3][i].bet == a.bet)) {
+						for (let j = 0; j < sidepot3.length; j++) {
+							if (sidepot4[j].bet == this.roundData.bets[3][i].bet) {
+								let pot = sidepot4[j];
+								pot.players.push(this.roundData.bets[3][i].player);
+								sidepot4[j] = pot;
+							}
+						}
+					} else {
+						sidepot4.push({ bet: this.roundData.bets[3][i].bet, players: [this.roundData.bets[3][i].player] })
+					}
+				}
+
+				let winnings = 0;
+				//NOTE: does not handle more than two winners correctly yet
+				for (pot of sidepot1) {
+					if (pot.players.includes(winner.getUsername())) {
+						if (winners.length == 1)
+							winnings += pot.bet * pot.players.length;
+						else {
+							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+								winnings += (pot.bet * pot.players.length) / winners.length;
+							}
+						}
+					} else {
+						for (player of pot.players) {
+							//return money
+							let playerObj = this.players.find(a => a.getUsername() == player);
+							if (playerObj == undefined) { console.log('yikes'); break; }
+							if (winners.length == 1)
+								playerObj.money = playerObj.money + Math.floor(pot.bet / pot.players.length);
+							else {
+								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername())))
+									playerObj.money = playerObj.money + Math.floor((pot.bet / pot.players.length) / winners.length);
+							}
+						}
+					}
+				}
+				for (pot of sidepot2) {
+					if (pot.players.includes(winner.getUsername())) {
+						if (winners.length == 1)
+							winnings += pot.bet * pot.players.length;
+						else {
+							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+								winnings += (pot.bet * pot.players.length) / winners.length;
+							}
+						}
+					} else {
+						for (player of pot.players) {
+							//return money
+							let playerObj = this.players.find(a => a.getUsername() == player);
+							if (playerObj == undefined) { console.log('yikes'); break; }
+							if (winners.length == 1)
+								playerObj.money = playerObj.money + Math.floor(pot.bet / pot.players.length);
+							else {
+								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername())))
+									playerObj.money = playerObj.money + Math.floor((pot.bet / pot.players.length) / winners.length);
+							}
+						}
+					}
+				}
+				for (pot of sidepot3) {
+					if (pot.players.includes(winner.getUsername())) {
+						if (winners.length == 1)
+							winnings += pot.bet * pot.players.length;
+						else {
+							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+								winnings += (pot.bet * pot.players.length) / winners.length;
+							}
+						}
+					} else {
+						for (player of pot.players) {
+							//return money
+							let playerObj = this.players.find(a => a.getUsername() == player);
+							if (playerObj == undefined) { console.log('yikes'); break; }
+							if (winners.length == 1)
+								playerObj.money = playerObj.money + Math.floor(pot.bet / pot.players.length);
+							else {
+								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername())))
+									playerObj.money = playerObj.money + Math.floor((pot.bet / pot.players.length) / winners.length);
+							}
+						}
+					}
+				}
+				for (pot of sidepot4) {
+					if (pot.players.includes(winner.getUsername())) {
+						if (winners.length == 1)
+							winnings += pot.bet * pot.players.length;
+						else {
+							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+								winnings += (pot.bet * pot.players.length) / winners.length;
+							}
+						}
+					} else {
+						for (player of pot.players) {
+							//return money
+							let playerObj = this.players.find(a => a.getUsername() == player);
+							if (playerObj == undefined) { console.log('yikes'); break; }
+							if (winners.length == 1)
+								playerObj.money = playerObj.money + Math.floor(pot.bet / pot.players.length);
+							else {
+								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername())))
+									playerObj.money = playerObj.money + Math.floor((pot.bet / pot.players.length) / winners.length);
+							}
+						}
+					}
+				}
+				winner.money = winner.money + winnings;
+			} else {
+				winner.money = winner.money + potEligible;
+			}
 		}
 	}
 
@@ -370,6 +599,15 @@ const Game = function (name, host) {
 		}
 	}
 
+	this.allPlayersAllIn = () => {
+		console.log(this.players);
+		let condition = true;
+		for (player of this.players) {
+			if (!player.allIn) condition = false;
+		}
+		return condition;
+	}
+
 	this.isStageComplete = () => {
 		const maxBet = this.getCurrentTopBet();
 		let allPlayersPresent = false;
@@ -383,7 +621,7 @@ const Game = function (name, host) {
 			allPlayersPresent = this.roundData.bets[this.roundData.bets.length - 1].length >= numUnfolded;
 		}
 
-		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) : true) && acc, true);
+		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) || this.findPlayer(this.players.find(a.getUsername() == curr.player)).allIn : true) && acc, true);
 	}
 
 	this.setCardsPerPlayer = (numCards) => {
