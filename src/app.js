@@ -87,6 +87,15 @@ io.on('connection', (socket) => {
 		}
 	});
 
+	socket.on('startNextRound', () => {
+		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		if (game != undefined) {
+			if (game.roundInProgress === false) {
+				game.startNewRound();
+			}
+		}
+	});
+
 	//precondition: user must be able to make the move in the first place.
 	socket.on('moveMade', (data) => {
 		//worst case complexity O(num_rooms * num_players_in_room)

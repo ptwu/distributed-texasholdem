@@ -19,11 +19,13 @@ const Game = function (name, host) {
 	this.foldPot = 0;
 	this.bigBlindWent = false;
 	this.lastMoveParsed = { 'move': '', 'player': '' };
+	this.roundInProgress = true;
 
 	const constructor = function () {
 	}(this);
 
 	this.startNewRound = () => {
+		this.roundInProgress = true;
 		this.foldPot = 0;
 		this.bigBlindWent = false;
 		let bigBlindIndex, smallBlindIndex;
@@ -560,8 +562,13 @@ const Game = function (name, host) {
 		return res;
 	}
 
+	this.endHandAllFold = () => {
+		this.roundInProgress = false;
+	}
+
 	this.revealCards = (winnersUsernames) => {
 		console.log('revealllllll');
+		this.roundInProgress = false;
 		let cardData = [];
 		for (let i = 0; i < this.players.length; i++) {
 			cardData.push({

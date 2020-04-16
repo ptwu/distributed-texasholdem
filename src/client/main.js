@@ -38,7 +38,7 @@ socket.on("joinRoom", function (data) {
 		$("#hostButton").removeClass("disabled");
 	} else {
 		$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game.</p>');
-		$('#mainContent').html('<p></p>');
+		$('#mainContent').empty();
 		$('#playersNamesJoined').html(data.players.map(function (p) {
 			return '<span>' + p + '</span><br />';
 		}));
@@ -75,6 +75,10 @@ socket.on("gameBegin", function (data) {
 	}
 });
 
+function playNext() {
+	socket.emit('startNextRound', {});
+}
+
 socket.on("reveal", function (data) {
 	$("#usernameFold").hide();
 	$("#usernameCheck").hide();
@@ -82,6 +86,7 @@ socket.on("reveal", function (data) {
 	$("#usernameCall").hide();
 	$("#usernameRaise").hide();
 	$('#table-title').text('Hand Winner(s): ' + data.winners);
+	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Play Next Round</button>');
 	$('#blindStatus').text(data.hand);
 	$('#usernamesMoney').text('$' + data.money);
 	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand }) : '&nbsp;') }));
@@ -243,6 +248,7 @@ socket.on("displayPossibleMoves", function (data) {
 });
 
 function renderSelf(data) {
+	$('#playNext').empty();
 	$('#usernamesMoney').text("$" + data.money);
 	if (data.text == 'Their Turn') {
 		$("#playerInformationCard").removeClass('grey');
