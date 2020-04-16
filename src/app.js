@@ -3,7 +3,6 @@ const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
 const Game = require('./classes/game.js');
-const Card = require('./classes/card.js');
 
 const app = express();
 const server = http.createServer(app);
@@ -63,8 +62,8 @@ io.on('connection', (socket) => {
 		}
 		if (topBet != 0) {
 			possibleMoves.bet = 'no';
-			if (player.blindValue != 'Big Blind' && !game.bigBlindWent) possibleMoves.check = 'no';
-			if (player.blindValue == 'Big Blind' && game.roundData.bets.length > 1) possibleMoves.check = 'no';
+			possibleMoves.check = 'no';
+			if (player.blindValue == 'Big Blind' && !game.bigBlindWent) possibleMoves.check = 'yes';
 		} else {
 			possibleMoves.raise = 'no';
 		}

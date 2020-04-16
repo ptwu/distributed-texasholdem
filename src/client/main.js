@@ -66,6 +66,7 @@ socket.on("rerender", function (data) {
 });
 
 socket.on("gameBegin", function (data) {
+	$('#navbar-ptwu').hide();
 	$('#joinModal').closeModal();
 	$('#hostModal').closeModal();
 	if (data == undefined) {
@@ -85,6 +86,13 @@ socket.on("reveal", function (data) {
 	$("#usernameBet").hide();
 	$("#usernameCall").hide();
 	$("#usernameRaise").hide();
+
+	for (var i = 0; i < data.winners.length; i++) {
+		if (data.winners[i] == data.username) {
+			Materialize.toast('You won the hand!', 4000);
+			break;
+		}
+	}
 	$('#table-title').text('Hand Winner(s): ' + data.winners);
 	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Play Next Round</button>');
 	$('#blindStatus').text(data.hand);

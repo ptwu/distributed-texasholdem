@@ -5,7 +5,7 @@
 Using `socket.io`, `Node.js`, and `express` to make a distributed poker game.
 
 ![Image of Distributed Texas Hold Em Gameplay](https://i.imgur.com/eGj6iHU.png)
-![Image of Distributed Texas Hold Em Gameplay](https://i.imgur.com/fa4UYLg.png)
+![Image of Distributed Texas Hold Em Lobby](https://i.imgur.com/TCusHG0.png)
 
 ## Commands
 `yarn install` installs all the dependencies required to run the webapp.

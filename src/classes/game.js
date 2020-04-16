@@ -195,14 +195,20 @@ const Game = function (name, host) {
 		if (this.isStageComplete()) {
 			if (this.allPlayersAllIn()) {
 				console.log(' all players all in');
-				this.community.push(this.deck.dealRandomCard());
-				this.community.push(this.deck.dealRandomCard());
-				this.community.push(this.deck.dealRandomCard());
-				this.roundData.bets.push([]);
-				this.community.push(this.deck.dealRandomCard());
-				this.roundData.bets.push([]);
-				this.community.push(this.deck.dealRandomCard());
-				this.roundData.bets.push([]);
+				if (this.roundData.bets.length == 1) {
+					this.community.push(this.deck.dealRandomCard());
+					this.community.push(this.deck.dealRandomCard());
+					this.community.push(this.deck.dealRandomCard());
+					this.roundData.bets.push([]);
+				}
+				if (this.roundData.bets.length == 2) {
+					this.community.push(this.deck.dealRandomCard());
+					this.roundData.bets.push([]);
+				}
+				if (this.roundData.bets.length == 3) {
+					this.community.push(this.deck.dealRandomCard());
+					this.roundData.bets.push([]);
+				}
 				this.rerender();
 			}
 			// stage-by-stage logic.
@@ -591,7 +597,7 @@ const Game = function (name, host) {
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit('endHand', {
 				'winner': username,
-				'folded': this.players[i].getStatus(),
+				'folded': (this.players[pn].getUsername() != username ? 'Fold' : ''),
 				'username': this.players[pn].getUsername(),
 				'pot': this.getCurrentPot(),
 				'money': this.players[pn].getMoney(),
@@ -627,12 +633,11 @@ const Game = function (name, host) {
 	}
 
 	this.allPlayersAllIn = () => {
-		console.log(this.players);
-		let condition = true;
+		let participatingPlayers = 0;
 		for (player of this.players) {
-			if (!player.allIn && player.getStatus() != 'Fold') condition = false;
+			if (!player.allIn && player.getStatus() != 'Fold') participatingPlayers++;
 		}
-		return condition;
+		return participatingPlayers <= 1;
 	}
 
 	this.isStageComplete = () => {
@@ -642,13 +647,14 @@ const Game = function (name, host) {
 		for (let i = 0; i < this.players.length; i++) {
 			if (this.players[i].status != 'Fold') numUnfolded++;
 		}
+		const currRound = this.roundData.bets[this.roundData.bets.length - 1];
 		if (this.roundData.bets.length == 1) {
-			allPlayersPresent = (this.roundData.bets[this.roundData.bets.length - 1].length >= numUnfolded) && this.bigBlindWent;
+			allPlayersPresent = (currRound.filter(a => a.bet != 'Fold').length >= numUnfolded) && this.bigBlindWent;
 		} else {
-			allPlayersPresent = this.roundData.bets[this.roundData.bets.length - 1].length >= numUnfolded;
+			allPlayersPresent = currRound.filter(a => a.bet != 'Fold').length >= numUnfolded;
 		}
 
-		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) || this.findPlayer(this.players.find(a => a.getUsername() == curr.player)).allIn : true) && acc, true);
+		return allPlayersPresent && currRound.reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) || this.findPlayer(this.players.find(a => a.getUsername() == curr.player)).allIn : true) && acc, true);
 	}
 
 	this.setCardsPerPlayer = (numCards) => {
