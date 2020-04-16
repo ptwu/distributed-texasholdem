@@ -206,54 +206,70 @@ const Game = function (name, host) {
 				this.rerender();
 			}
 			// stage-by-stage logic.
-			// bigBlindWent = false;
-			if (this.roundData.bets.length == 1) {
-				this.community.push(this.deck.dealRandomCard());
-				this.community.push(this.deck.dealRandomCard());
-				this.community.push(this.deck.dealRandomCard());
-				for (let i = 0; i < this.players.length; i++) {
-					if (i === this.findFirstToGoPlayer() && this.players[i].getStatus() !== 'Fold') {
-						this.players[i].setStatus('Their Turn');
-					} else if (this.players[i].getStatus() !== 'Fold') {
-						this.players[i].setStatus('');
-					}
+			// check if everyone folded but one
+			let numNonFolds = 0;
+			let nonFolderPlayer;
+			for (let i = 0; i < this.getNumPlayers(); i++) {
+				if (this.players[i].getStatus() != 'Fold') {
+					numNonFolds++;
+					nonFolderPlayer = this.players[i];
 				}
-				this.roundData.bets.push([]);
-			} else if (this.roundData.bets.length == 2) {
-				this.community.push(this.deck.dealRandomCard());
-				for (let i = 0; i < this.players.length; i++) {
-					if (i === this.findFirstToGoPlayer() && this.players[i].getStatus() !== 'Fold') {
-						this.players[i].setStatus('Their Turn');
-					} else if (this.players[i].getStatus() !== 'Fold') {
-						this.players[i].setStatus('');
-					}
-				}
-				this.roundData.bets.push([]);
-			} else if (this.roundData.bets.length == 3) {
-				this.community.push(this.deck.dealRandomCard());
-				for (let i = 0; i < this.players.length; i++) {
-					if (i === this.findFirstToGoPlayer() && this.players[i].getStatus() !== 'Fold') {
-						this.players[i].setStatus('Their Turn');
-					} else if (this.players[i].getStatus() !== 'Fold') {
-						this.players[i].setStatus('');
-					}
-				}
-				this.roundData.bets.push([]);
-			} else if (this.roundData.bets.length == 4) {
+			}
+			if (numNonFolds == 1) {
+				// everyone folded, start new round, give pot to player
+				console.log('everyone folded except one');
+				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
+				this.endHandAllFold(nonFolderPlayer.getUsername());
 				handOver = true;
-				const roundResults = this.evaluateWinners();
-				for (playerResult of roundResults.playersData) {
-					playerResult.player.setStatus(playerResult.hand.name);
-				}
-				let winningPlayers = [];
-				for (winner of roundResults.winnerData) {
-					winningPlayers.push(winner.player);
-				}
-				this.distributeMoney(winningPlayers);
-				this.revealCards(winningPlayers.map(a => a.getUsername()));
-
 			} else {
-				console.log('This stage of the round is INVALID!!');
+				if (this.roundData.bets.length == 1) {
+					this.community.push(this.deck.dealRandomCard());
+					this.community.push(this.deck.dealRandomCard());
+					this.community.push(this.deck.dealRandomCard());
+					for (let i = 0; i < this.players.length; i++) {
+						if (i === this.findFirstToGoPlayer() && this.players[i].getStatus() !== 'Fold') {
+							this.players[i].setStatus('Their Turn');
+						} else if (this.players[i].getStatus() !== 'Fold') {
+							this.players[i].setStatus('');
+						}
+					}
+					this.roundData.bets.push([]);
+				} else if (this.roundData.bets.length == 2) {
+					this.community.push(this.deck.dealRandomCard());
+					for (let i = 0; i < this.players.length; i++) {
+						if (i === this.findFirstToGoPlayer() && this.players[i].getStatus() !== 'Fold') {
+							this.players[i].setStatus('Their Turn');
+						} else if (this.players[i].getStatus() !== 'Fold') {
+							this.players[i].setStatus('');
+						}
+					}
+					this.roundData.bets.push([]);
+				} else if (this.roundData.bets.length == 3) {
+					this.community.push(this.deck.dealRandomCard());
+					for (let i = 0; i < this.players.length; i++) {
+						if (i === this.findFirstToGoPlayer() && this.players[i].getStatus() !== 'Fold') {
+							this.players[i].setStatus('Their Turn');
+						} else if (this.players[i].getStatus() !== 'Fold') {
+							this.players[i].setStatus('');
+						}
+					}
+					this.roundData.bets.push([]);
+				} else if (this.roundData.bets.length == 4) {
+					handOver = true;
+					const roundResults = this.evaluateWinners();
+					for (playerResult of roundResults.playersData) {
+						playerResult.player.setStatus(playerResult.hand.name);
+					}
+					let winningPlayers = [];
+					for (winner of roundResults.winnerData) {
+						winningPlayers.push(winner.player);
+					}
+					this.distributeMoney(winningPlayers);
+					this.revealCards(winningPlayers.map(a => a.getUsername()));
+
+				} else {
+					console.log('This stage of the round is INVALID!!');
+				}
 			}
 		} else {
 			//check if everyone folded except one player
@@ -265,12 +281,12 @@ const Game = function (name, host) {
 					nonFolderPlayer = this.players[i];
 				}
 			}
-			console.log('number of non folds:' + numNonFolds);
 			if (numNonFolds == 1) {
 				// everyone folded, start new round, give pot to player
 				console.log('everyone folded except one');
 				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
-				// TODO, basically like reveal cards but no cards are shown.
+				this.endHandAllFold(nonFolderPlayer.getUsername());
+				handOver = true;
 			} else {
 				let currTurnIndex = 0;
 				//check if move just made was a fold
@@ -562,8 +578,27 @@ const Game = function (name, host) {
 		return res;
 	}
 
-	this.endHandAllFold = () => {
+	this.endHandAllFold = (username) => {
 		this.roundInProgress = false;
+		let cardData = [];
+		for (let i = 0; i < this.players.length; i++) {
+			cardData.push({
+				'username': this.players[i].getUsername(),
+				'money': this.players[i].getMoney(),
+				'text': this.players[i].getStatus()
+			});
+		}
+		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
+			this.players[pn].emit('endHand', {
+				'winner': username,
+				'folded': this.players[i].getStatus(),
+				'username': this.players[pn].getUsername(),
+				'pot': this.getCurrentPot(),
+				'money': this.players[pn].getMoney(),
+				'cards': cardData,
+				'bets': this.roundData.bets,
+			});
+		}
 	}
 
 	this.revealCards = (winnersUsernames) => {

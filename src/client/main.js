@@ -92,6 +92,30 @@ socket.on("reveal", function (data) {
 	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand }) : '&nbsp;') }));
 });
 
+socket.on("endHand", function (data) {
+	$("#usernameFold").hide();
+	$("#usernameCheck").hide();
+	$("#usernameBet").hide();
+	$("#usernameCall").hide();
+	$("#usernameRaise").hide();
+	$('#table-title').text(data.winner + ' takes the pot of $' + data.pot);
+	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Play Next Round</button>');
+	$('#blindStatus').text('');
+	if (data.folded == 'Fold') {
+		$("#status").text('You Folded');
+		$("#playerInformationCard").removeClass('theirTurn');
+		$("#playerInformationCard").removeClass('green');
+		$("#playerInformationCard").addClass('grey');
+		$("#usernameFold").hide();
+		$("#usernameCheck").hide();
+		$("#usernameBet").hide();
+		$("#usernameCall").hide();
+		$("#usernameRaise").hide();
+	}
+	$('#usernamesMoney').text('$' + data.money);
+	$('#opponentCards').html(data.cards.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.text, 'money': p.money, 'blind': '', 'bets': data.bets }) : '&nbsp;') }));
+});
+
 var beginHost = function () {
 	if ($('#hostName-field').val() == "") {
 		$('.toast').hide();
