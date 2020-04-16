@@ -144,8 +144,10 @@ const Game = function (name, host) {
 		let totalBetInStage = 0;
 
 		for (let j = 0; j < stageData.length; j++) {
-			if (stageData[j].player == player.getUsername() && stageData[j].bet != 'Buy-in' && stageData[j].bet != 'Fold')
+			if (stageData[j].player == player.getUsername() && stageData[j].bet != 'Buy-in' && stageData[j].bet != 'Fold') {
 				totalBetInStage += stageData[j].bet;
+				break;
+			}
 		}
 		return totalBetInStage;
 	}
@@ -641,7 +643,6 @@ const Game = function (name, host) {
 	}
 
 	this.isStageComplete = () => {
-		const maxBet = this.getCurrentTopBet();
 		let allPlayersPresent = false;
 		let numUnfolded = 0;
 		for (let i = 0; i < this.players.length; i++) {
@@ -653,8 +654,16 @@ const Game = function (name, host) {
 		} else {
 			allPlayersPresent = currRound.filter(a => a.bet != 'Fold').length >= numUnfolded;
 		}
-
-		return allPlayersPresent && currRound.reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) || this.findPlayer(this.players.find(a => a.getUsername() == curr.player)).allIn : true) && acc, true);
+		console.log('all players present ' + allPlayersPresent);
+		let allPlayersCall = true;
+		for (player of this.players) {
+			if (player.getStatus() != 'Fold' && this.getPlayerBetInStage(player) != this.getCurrentTopBet() && !player.allIn) {
+				allPlayersCall = false;
+				break;
+			}
+		}
+		console.log('all players call ' + allPlayersCall);
+		return allPlayersPresent && allPlayersCall;
 	}
 
 	this.setCardsPerPlayer = (numCards) => {
