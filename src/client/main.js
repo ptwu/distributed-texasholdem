@@ -65,10 +65,6 @@ socket.on("rerender", function (data) {
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets });
 });
 
-socket.on("wait", function (data) {
-	setTimeout(function () { console.log('sleeping'), 5000 });
-});
-
 socket.on("gameBegin", function (data) {
 	$('#joinModal').closeModal();
 	$('#hostModal').closeModal();
@@ -80,8 +76,14 @@ socket.on("gameBegin", function (data) {
 });
 
 socket.on("reveal", function (data) {
+	$("#usernameFold").hide();
+	$("#usernameCheck").hide();
+	$("#usernameBet").hide();
+	$("#usernameCall").hide();
+	$("#usernameRaise").hide();
 	$('#table-title').text('Hand Winner(s): ' + data.winners);
 	$('#blindStatus').text(data.hand);
+	$('#usernamesMoney').text('$' + data.money);
 	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand }) : '&nbsp;') }));
 });
 
@@ -125,7 +127,7 @@ var bet = function () {
 	}
 }
 
-var call = function () {
+function call() {
 	socket.emit('moveMade', { move: 'call', bet: 'Call' });
 }
 

@@ -28,7 +28,8 @@ const Game = function (name, host) {
 		this.bigBlindWent = false;
 		let bigBlindIndex, smallBlindIndex;
 		this.community = [];
-		this.roundData = { 'bigBlind': '', 'smallBlind': '', 'turn': '', 'bets': [] };
+		this.roundData.turn = '';
+		this.roundData.bets = [];
 		if (this.roundNum == 0) {
 			bigBlindIndex = Math.floor(Math.random() * this.players.length);
 			smallBlindIndex = (bigBlindIndex + 1 >= this.players.length) ? 0 : bigBlindIndex + 1;
@@ -52,7 +53,6 @@ const Game = function (name, host) {
 			//preflop left of big blind and then other stages are small blind
 			//then positions move to the left
 		} else {
-			this.emitPlayers("wait", {});
 			bigBlindIndex = (this.roundData.bigBlind - 1 < 0) ? (this.players.length - 1) : this.roundData.bigBlind - 1;
 			smallBlindIndex = (this.roundData.smallBlind - 1 < 0) ? (this.players.length - 1) : this.roundData.smallBlind - 1;
 			for (let i = 0; i < this.players.length; i++) {
@@ -193,33 +193,15 @@ const Game = function (name, host) {
 		if (this.isStageComplete()) {
 			if (this.allPlayersAllIn()) {
 				console.log(' all players all in');
-				if (this.roundData.bets.length == 1) {
-					this.community.push(this.deck.dealRandomCard());
-					this.community.push(this.deck.dealRandomCard());
-					this.community.push(this.deck.dealRandomCard());
-					this.roundData.bets.push([]);
-				}
-				if (this.roundData.bets.length == 2) {
-					this.community.push(this.deck.dealRandomCard());
-					this.roundData.bets.push([]);
-				}
-				if (this.roundData.bets.length == 3) {
-					this.community.push(this.deck.dealRandomCard());
-					this.roundData.bets.push([]);
-					this.rerender();
-				} if (this.roundData.bets.length == 4) {
-					handOver = true;
-					const roundResults = this.evaluateWinners();
-					for (playerResult of roundResults.playersData) {
-						playerResult.player.setStatus(playerResult.hand.name);
-					}
-					let winningPlayers = [];
-					for (winner of roundResults.winnerData) {
-						winningPlayers.push(winner.player);
-					}
-					this.distributeMoney(winningPlayers);
-					this.revealCards(winningPlayers.map(a => a.getUsername()));
-				}
+				this.community.push(this.deck.dealRandomCard());
+				this.community.push(this.deck.dealRandomCard());
+				this.community.push(this.deck.dealRandomCard());
+				this.roundData.bets.push([]);
+				this.community.push(this.deck.dealRandomCard());
+				this.roundData.bets.push([]);
+				this.community.push(this.deck.dealRandomCard());
+				this.roundData.bets.push([]);
+				this.rerender();
 			}
 			// stage-by-stage logic.
 			// bigBlindWent = false;
@@ -286,7 +268,7 @@ const Game = function (name, host) {
 				// everyone folded, start new round, give pot to player
 				console.log('everyone folded except one');
 				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
-				this.startNewRound();
+				// TODO, basically like reveal cards but no cards are shown.
 			} else {
 				let currTurnIndex = 0;
 				//check if move just made was a fold
@@ -346,8 +328,8 @@ const Game = function (name, host) {
 
 	this.distributeMoney = (winners) => {
 		const numWinners = winners.length;
-		const pot = this.getCurrentPot();
-		const potEligible = Math.floor(pot / numWinners);
+		const potTotal = this.getCurrentPot();
+		const potEligible = Math.floor(potTotal / numWinners);
 		for (winner of winners) {
 			if (winner.allIn || winner.getMoney() == 0) {
 				// calculate what all-in player is eligible for (side pot calculation).
@@ -357,8 +339,7 @@ const Game = function (name, host) {
 				let sidepot3 = [];
 				let sidepot4 = [];
 				for (let i = 0; i < 4; i++) {
-					// might? cause issues look into later
-					this.roundData.bets[i] = this.roundData.bets[i].filter(a => typeof parseInt(a.bet) == 'number');
+					this.roundData.bets[i] = this.roundData.bets[i].filter(a => typeof a.bet === 'number');
 					this.roundData.bets[i].sort((a, b) => a.bet - b.bet);
 				}
 				for (let i = 0; i < this.roundData.bets[0].length; i++) {
@@ -413,7 +394,10 @@ const Game = function (name, host) {
 						sidepot4.push({ bet: this.roundData.bets[3][i].bet, players: [this.roundData.bets[3][i].player] })
 					}
 				}
-
+				console.log('sidepot 1 ' + JSON.stringify(sidepot1));
+				console.log('sidepot 2 ' + JSON.stringify(sidepot2));
+				console.log('sidepot 3 ' + JSON.stringify(sidepot3));
+				console.log('sidepot 4 ' + JSON.stringify(sidepot4));
 				let winnings = 0;
 				//NOTE: does not handle more than two winners correctly yet
 				for (pot of sidepot1) {
@@ -591,6 +575,7 @@ const Game = function (name, host) {
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit('reveal', {
 				'username': this.players[pn].getUsername(),
+				'money': this.players[pn].getMoney(),
 				'cards': cardData,
 				'bets': this.roundData.bets,
 				'winners': winnersUsernames.toString(),
@@ -603,7 +588,7 @@ const Game = function (name, host) {
 		console.log(this.players);
 		let condition = true;
 		for (player of this.players) {
-			if (!player.allIn) condition = false;
+			if (!player.allIn && player.getStatus() != 'Fold') condition = false;
 		}
 		return condition;
 	}
@@ -621,7 +606,7 @@ const Game = function (name, host) {
 			allPlayersPresent = this.roundData.bets[this.roundData.bets.length - 1].length >= numUnfolded;
 		}
 
-		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) || this.findPlayer(this.players.find(a.getUsername() == curr.player)).allIn : true) && acc, true);
+		return allPlayersPresent && this.roundData.bets[this.roundData.bets.length - 1].reduce((acc, curr) => ((curr.bet != 'Buy-in' && curr.bet != 'Fold') ? (curr.bet == maxBet) || this.findPlayer(this.players.find(a => a.getUsername() == curr.player)).allIn : true) && acc, true);
 	}
 
 	this.setCardsPerPlayer = (numCards) => {
