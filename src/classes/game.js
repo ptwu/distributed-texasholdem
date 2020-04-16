@@ -281,7 +281,7 @@ const Game = function (name, host) {
 					nonFolderPlayer = this.players[i];
 				}
 			}
-			if (numNonFolds == 1) {
+			if (!handOver && numNonFolds == 1) {
 				// everyone folded, start new round, give pot to player
 				console.log('everyone folded except one');
 				nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
