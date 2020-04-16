@@ -64,6 +64,7 @@ io.on('connection', (socket) => {
 		if (topBet != 0) {
 			possibleMoves.bet = 'no';
 			if (player.blindValue != 'Big Blind' && !game.bigBlindWent) possibleMoves.check = 'no';
+			if (player.blindValue == 'Big Blind' && game.roundData.bets.length > 1) possibleMoves.check = 'no';
 		} else {
 			possibleMoves.raise = 'no';
 		}
