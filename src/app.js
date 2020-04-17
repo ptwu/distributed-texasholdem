@@ -188,7 +188,7 @@ io.on('connection', (socket) => {
 			} else if (data.move == 'raise') {
 				const currBet = game.getPlayerBetInStage(game.findPlayer(socket.id));
 				const player = game.findPlayer(socket.id);
-				if (data.bet - currBet - player.getMoney() >= 0) {
+				if (player.getMoney() - (data.bet - currBet) >= 0) {
 					if (currBet === 0) {
 						game.roundData.bets[game.roundData.bets.length - 1].push({ player: player.getUsername(), bet: data.bet });
 						player.money = player.money - data.bet;

@@ -52,6 +52,12 @@ socket.on("dealt", function (data) {
 });
 
 socket.on("rerender", function (data) {
+	$("#betRangeSlider").attr({
+		"value": 0
+	});
+	$("#raiseRangeSlider").attr({
+		"value": 0
+	});
 	console.log(JSON.stringify(data));
 	if (data.myBet == 0) {
 		$('#usernamesCards').text(data.username + " - My Cards");
@@ -135,6 +141,7 @@ socket.on("endHand", function (data) {
 var beginHost = function () {
 	if ($('#hostName-field').val() == "") {
 		$('.toast').hide();
+		$('#hostModal').closeModal();
 		Materialize.toast('Enter a valid name! (max length of name is 12 characters)', 4000);
 		$("#joinButton").removeClass("disabled");
 	} else {
