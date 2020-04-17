@@ -75,23 +75,25 @@ const Game = function (name, host) {
 			this.players[goFirstIndex].setStatus('Their Turn');
 
 		}
-		// handle big and small blind initial forced bets
-		if (this.players[bigBlindIndex].money == 0) {
-			this.players[bigBlindIndex].setStatus('Bankrupt');
-			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 'Buy-in' }]);
-		} else {
-			if (this.players[bigBlindIndex].money < 2) {
-				this.players[bigBlindIndex].money = 0;
-				this.players[bigBlindIndex].allIn = true;
-				this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 1 }]);
-			} else {
-				this.players[bigBlindIndex].money = this.players[bigBlindIndex].money - 2;
-				this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 2 }]);
+		for (player of this.players) {
+			if (player.getMoney() == 0) {
+				player.money = 100;
+				player.buyIns = player.buyIns + 1;
 			}
 		}
-		if (this.players[smallBlindIndex].money == 0) {
-			this.players[smallBlindIndex].setStatus('Bankrupt');
-		} else if (this.players[smallBlindIndex].money == 1) {
+
+		// handle big and small blind initial forced bets
+
+		if (this.players[bigBlindIndex].money < 2) {
+			this.players[bigBlindIndex].money = 0;
+			this.players[bigBlindIndex].allIn = true;
+			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 1 }]);
+		} else {
+			this.players[bigBlindIndex].money = this.players[bigBlindIndex].money - 2;
+			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 2 }]);
+		}
+
+		if (this.players[smallBlindIndex].money == 1) {
 			this.players[smallBlindIndex].money = 0;
 			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: 1 });
 			this.players[smallBlindIndex].allIn = true;
@@ -107,7 +109,13 @@ const Game = function (name, host) {
 	this.rerender = () => {
 		let playersData = [];
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-			playersData.push({ 'username': this.players[pn].getUsername(), 'status': this.players[pn].getStatus(), 'blind': this.players[pn].getBlind(), 'money': this.players[pn].getMoney() })
+			playersData.push({
+				'username': this.players[pn].getUsername(),
+				'status': this.players[pn].getStatus(),
+				'blind': this.players[pn].getBlind(),
+				'money': this.players[pn].getMoney(),
+				'buyIns': this.players[pn].buyIns
+			})
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit('rerender', {
@@ -123,7 +131,8 @@ const Game = function (name, host) {
 				'myBet': this.getPlayerBetInStage(this.players[pn]),
 				'myStatus': this.players[pn].getStatus(),
 				'myBlind': this.players[pn].getBlind(),
-				'roundInProgress': this.roundInProgress
+				'roundInProgress': this.roundInProgress,
+				'buyIns': this.players[pn].buyIns
 			});
 		}
 	}
