@@ -146,21 +146,25 @@ var beginHost = function () {
 		$("#joinButton").removeClass("disabled");
 	} else {
 		socket.emit('host', { username: $('#hostName-field').val() });
+		$("#joinButton").addClass("disabled");
+		$('#joinButton').off('click');
 	}
-	$("#joinButton").addClass("disabled");
-	$('#joinButton').off('click');
+
 }
 
 var joinRoom = function () {
 	if ($('#joinName-field').val() == "" || $('#code-field').val() == "" || $('#joinName-field').val().length > 12) {
 		$('.toast').hide();
 		Materialize.toast('Enter a valid name/code! (max length of name is 12 characters.)', 4000);
+		$('#joinModal').closeModal();
 		$("#hostButton").removeClass("disabled");
+		$("#hostButton").on("click");
 	} else {
 		socket.emit('join', { code: $('#code-field').val(), username: $('#joinName-field').val() });
+		$("#hostButton").addClass("disabled");
+		$('#hostButton').off('click');
 	}
-	$("#hostButton").addClass("disabled");
-	$('#hostButton').off('click');
+
 }
 
 var startGame = function (gameCode) {
