@@ -8,6 +8,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+const PORT = process.env.PORT || 3000;
+
 app.use('/', express.static(__dirname + '/client'));
 
 let rooms = [];
@@ -203,7 +205,7 @@ io.on('connection', (socket) => {
 		} else { console.log('ERROR: can\'t find game!!!'); }
 	});
 
-	socket.on('disconnect', () => console.log('disconnect ' + socket.id));
+	socket.on('disconnect', () => console.log(`disconnect  ${socket.id}`));
 });
 
-server.listen(3000);
+server.listen(PORT, () => console.log(`hosting on port ${PORT}`));

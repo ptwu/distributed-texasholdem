@@ -4,7 +4,7 @@ $(document).ready(function () {
 	$('.tooltipped').tooltip({ delay: 50 });
 });
 
-var socket = io('http://localhost:3000');
+var socket = io();
 var gameInfo = null;
 
 socket.on("hostRoom", function (data) {
