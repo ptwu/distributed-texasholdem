@@ -758,6 +758,9 @@ const Game = function (name, host) {
 
 	this.disconnectPlayer = (player) => {
 		this.disconnectedPlayers.push(player);
+		if (player.getStatus() == 'Their Turn') {
+			this.moveOntoNextPlayer();
+		}
 		this.players = this.players.filter(a => a != player);
 		if (player == this.host) {
 			if (this.players.length > 0) {
@@ -765,9 +768,6 @@ const Game = function (name, host) {
 			}
 		}
 		this.emitPlayers('playerDisconnected', { 'player': player.getUsername() });
-		if (player.getStatus() == 'Their Turn') {
-			this.moveOntoNextPlayer();
-		}
 		this.emitPlayers('joinRoomUpdate', { 'players': this.getPlayersArray(), 'code': this.getCode() });
 		this.emitPlayers('hostRoomUpdate', { 'players': this.getPlayersArray() });
 		this.rerender();
