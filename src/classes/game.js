@@ -33,6 +33,8 @@ const Game = function (name, host) {
 		this.community = [];
 		this.roundData.turn = '';
 		this.roundData.bets = [];
+		this.dealCards();
+		console.log('deck len' + this.deck.cards.length);
 		for (pn of this.players) {
 			pn.allIn = false;
 		}
@@ -708,7 +710,9 @@ const Game = function (name, host) {
 	};
 
 	this.dealCards = () => {
+		this.deck.shuffle();
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
+			this.players[pn].cards = [];
 			for (let i = 0; i < this.cardsPerPlayer; i++) {
 				this.players[pn].addCard(this.deck.dealRandomCard());
 			}
