@@ -33,6 +33,9 @@ const Game = function (name, host) {
 		this.community = [];
 		this.roundData.turn = '';
 		this.roundData.bets = [];
+		for (pn of this.players) {
+			pn.allIn = false;
+		}
 		if (this.roundNum == 0) {
 			bigBlindIndex = Math.floor(Math.random() * this.players.length);
 			smallBlindIndex = (bigBlindIndex + 1 >= this.players.length) ? 0 : bigBlindIndex + 1;
@@ -190,7 +193,6 @@ const Game = function (name, host) {
 	}
 
 	this.findFirstToGoPlayer = () => {
-		console.log(this.roundData.smallBlind);
 		if (this.players[this.roundData.smallBlind].getStatus() == 'Fold') {
 			let index = this.roundData.smallBlind;
 			do {
@@ -206,6 +208,7 @@ const Game = function (name, host) {
 		let handOver = false;
 		console.log(this.roundData.bets[this.roundData.bets.length - 1]);
 		if (this.isStageComplete()) {
+			console.log('stage complete');
 			if (this.allPlayersAllIn()) {
 				console.log(' all players all in');
 				if (this.roundData.bets.length == 1) {
@@ -291,6 +294,7 @@ const Game = function (name, host) {
 				}
 			}
 		} else {
+			console.log('stage not complete');
 			//check if everyone folded except one player
 			let numNonFolds = 0;
 			let nonFolderPlayer;
@@ -309,7 +313,6 @@ const Game = function (name, host) {
 			} else {
 				let currTurnIndex = 0;
 				//check if move just made was a fold
-				console.log(this.players);
 				if (this.lastMoveParsed.move == 'Fold') {
 					for (let i = 0; i < this.players.length; i++) {
 						if (this.players[i].username == this.lastMoveParsed.player.username) {
@@ -631,7 +634,8 @@ const Game = function (name, host) {
 				'cards': this.players[i].cards,
 				'hand': this.players[i].getStatus(),
 				'folded': this.players[i].getStatus() == 'Fold',
-				'money': this.players[i].getMoney()
+				'money': this.players[i].getMoney(),
+				'buyIns': this.players[i].buyIns
 			});
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {

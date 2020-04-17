@@ -139,40 +139,66 @@ io.on('connection', (socket) => {
 				if (player.money == 0) player.allIn = true;
 				game.moveOntoNextPlayer();
 			} else if (data.move == 'call') {
-				let currBet = game.getPlayerBetInStage(game.findPlayer(socket.id));
 				const player = game.findPlayer(socket.id);
+				let currBet = game.getPlayerBetInStage(player);
 				const topBet = game.getCurrentTopBet();
-				console.log('current bet: ' + currBet);
-				console.log('top bet: ' + topBet);
 				if (currBet === 0) {
 					if (game.roundData.bets[game.roundData.bets.length - 1].some(a => a.player == player.getUsername())) {
-						game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: topBet } : a);
-						game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - (topBet - currBet);
+						if (player.getMoney() - topBet <= 0) {
+							game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: player.getMoney() } : a);
+							player.money = 0;
+							player.allIn = true;
+						} else {
+							game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: topBet } : a);
+							player.money = player.money - topBet;
+						}
 					} else {
-						game.roundData.bets[game.roundData.bets.length - 1].push({
-							player: game.findPlayer(socket.id).getUsername(),
-							bet: topBet
-						});
-						game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - topBet;
-						if (game.findPlayer(socket.id).money == 0) game.findPlayer(socket.id).allIn = true;
+						if (player.getMoney() - topBet <= 0) {
+							game.roundData.bets[game.roundData.bets.length - 1].push({
+								player: player.getUsername(),
+								bet: player.getMoney()
+							});
+							player.money = 0;
+							player.allIn = true;
+						} else {
+							game.roundData.bets[game.roundData.bets.length - 1].push({
+								player: player.getUsername(),
+								bet: topBet
+							});
+							player.money = player.money - topBet;
+						}
 					}
-				} else {
-					game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: topBet } : a);
-					game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - (topBet - currBet);
-					if (game.findPlayer(socket.id).money == 0) game.findPlayer(socket.id).allIn = true;
 					game.moveOntoNextPlayer();
+				} else {
+					if (game.roundData.bets[game.roundData.bets.length - 1].some(a => a.player == player.getUsername())) {
+						if ((player.getMoney() + currBet) - topBet <= 0) {
+							player.allIn = true;
+							game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: player.getMoney() + currBet } : a);
+							game.moveOntoNextPlayer();
+							player.money = 0;
+						} else {
+							game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: topBet } : a);
+							player.money = player.money - (topBet - currBet);
+							game.moveOntoNextPlayer();
+						}
+					} else {
+						console.log('this should not happen');
+					}
 				}
 			} else if (data.move == 'raise') {
 				const currBet = game.getPlayerBetInStage(game.findPlayer(socket.id));
-				if (currBet === 0) {
-					game.roundData.bets[game.roundData.bets.length - 1].push({ player: game.findPlayer(socket.id).getUsername(), bet: data.bet });
-					game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - data.bet;
-				} else {
-					game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == game.findPlayer(socket.id).username ? { player: game.findPlayer(socket.id).getUsername(), bet: data.bet } : a);
-					game.findPlayer(socket.id).money = game.findPlayer(socket.id).money - (data.bet - currBet);
+				const player = game.findPlayer(socket.id);
+				if (data.bet - currBet - player.getMoney() >= 0) {
+					if (currBet === 0) {
+						game.roundData.bets[game.roundData.bets.length - 1].push({ player: player.getUsername(), bet: data.bet });
+						player.money = player.money - data.bet;
+					} else {
+						game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].map(a => a.player == player.getUsername() ? { player: player.getUsername(), bet: data.bet } : a);
+						player.money = player.money - (data.bet - currBet);
+					}
+					if (player.money == 0) player.allIn = true;
+					game.moveOntoNextPlayer();
 				}
-				if (game.findPlayer(socket.id).money == 0) game.findPlayer(socket.id).allIn = true;
-				game.moveOntoNextPlayer();
 			}
 		} else { console.log('ERROR: can\'t find game!!!'); }
 	});
