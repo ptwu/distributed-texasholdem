@@ -7,6 +7,10 @@ $(document).ready(function () {
 var socket = io();
 var gameInfo = null;
 
+socket.on("playerDisconnected", function (data) {
+	Materialize.toast(data.player + ' disconnected.', 4000);
+});
+
 socket.on("hostRoom", function (data) {
 	if (data != undefined) {
 		if (data.players.length >= 11) {
@@ -32,13 +36,31 @@ socket.on("hostRoom", function (data) {
 	}
 });
 
+socket.on("hostRoomUpdate", function (data) {
+	$('#playersNames').html(data.players.map(function (p) {
+		return '<span>' + p + '</span><br />';
+	}));
+	if (data.players.length == 1) {
+		$('#startGameArea').empty();
+	}
+});
+
+socket.on("joinRoomUpdate", function (data) {
+	$('#startGameAreaDisconnectSituation').html('<br /><button onclick=startGame(' + data.code + ') type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat">Start Game</button >');
+	$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>You are now a host of this game.</p>');
+
+	$('#playersNamesJoined').html(data.players.map(function (p) {
+		return '<span>' + p + '</span><br />';
+	}));
+});
+
 socket.on("joinRoom", function (data) {
 	if (data == undefined) {
 		$('#joinModal').closeModal();
 		Materialize.toast('Enter a valid name/code! (max length of name is 12 characters & cannot be the same as someone else\'s)', 4000);
 		$("#hostButton").removeClass("disabled");
 	} else {
-		$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game.</p>');
+		$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game. Leaving the page, refreshing, or going back will disconnect you from the game. </p>');
 		$('#mainContent').empty();
 		$('#playersNamesJoined').html(data.players.map(function (p) {
 			return '<span>' + p + '</span><br />';

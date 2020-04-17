@@ -19,7 +19,8 @@ const Game = function (name, host) {
 	this.foldPot = 0;
 	this.bigBlindWent = false;
 	this.lastMoveParsed = { 'move': '', 'player': '' };
-	this.roundInProgress = true;
+	this.roundInProgress = false;
+	this.disconnectedPlayers = [];
 
 	const constructor = function () {
 	}(this);
@@ -754,6 +755,23 @@ const Game = function (name, host) {
 		this.players.map(p => p.printPretty());
 		console.log('----------------- GAME');
 	};
+
+	this.disconnectPlayer = (player) => {
+		this.disconnectedPlayers.push(player);
+		this.players = this.players.filter(a => a != player);
+		if (player == this.host) {
+			if (this.players.length > 0) {
+				this.host = this.players[0].getUsername();
+			}
+		}
+		this.emitPlayers('playerDisconnected', { 'player': player.getUsername() });
+		if (player.getStatus() == 'Their Turn') {
+			this.moveOntoNextPlayer();
+		}
+		this.emitPlayers('joinRoomUpdate', { 'players': this.getPlayersArray(), 'code': this.getCode() });
+		this.emitPlayers('hostRoomUpdate', { 'players': this.getPlayersArray() });
+		this.rerender();
+	}
 
 };
 

@@ -205,7 +205,18 @@ io.on('connection', (socket) => {
 		} else { console.log('ERROR: can\'t find game!!!'); }
 	});
 
-	socket.on('disconnect', () => console.log(`disconnect  ${socket.id}`));
+	socket.on('disconnect', () => {
+		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		if (game != undefined) {
+			const player = game.findPlayer(socket.id);
+			game.disconnectPlayer(player);
+			if (game.players.length == 0) {
+				if (this.rooms != undefined && this.rooms.length !== 0) {
+					this.rooms = this.rooms.filter(a => a != game);
+				}
+			}
+		}
+	});
 });
 
 server.listen(PORT, () => console.log(`hosting on port ${PORT}`));
