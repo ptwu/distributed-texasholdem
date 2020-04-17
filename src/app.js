@@ -59,14 +59,14 @@ io.on('connection', (socket) => {
 			const player = game.findPlayer(socket.id);
 			const playerBet = game.getPlayerBetInStage(player);
 			const topBet = game.getCurrentTopBet();
-			let possibleMoves = { fold: 'yes', check: 'yes', bet: 'yes', call: 'yes', raise: 'yes' }
+			let possibleMoves = { fold: 'yes', check: 'yes', bet: 'yes', call: topBet, raise: 'yes' }
 			if (player.getStatus() == 'Fold') {
 				console.log('Error: Folded players should not be able to move.');
 			}
 			if (topBet != 0) {
 				possibleMoves.bet = 'no';
 				possibleMoves.check = 'no';
-				if (player.blindValue == 'Big Blind' && !game.bigBlindWent) possibleMoves.check = 'yes';
+				if (player.blindValue == 'Big Blind' && !game.bigBlindWent && topBet == 2) possibleMoves.check = 'yes';
 			} else {
 				possibleMoves.raise = 'no';
 			}

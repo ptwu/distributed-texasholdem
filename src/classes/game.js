@@ -604,6 +604,7 @@ const Game = function (name, host) {
 	}
 
 	this.endHandAllFold = (username) => {
+		console.log('endhandallfold' + this.players);
 		this.roundInProgress = false;
 		let cardData = [];
 		for (let i = 0; i < this.players.length; i++) {

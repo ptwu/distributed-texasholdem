@@ -52,12 +52,6 @@ socket.on("dealt", function (data) {
 });
 
 socket.on("rerender", function (data) {
-	$("#betRangeSlider").attr({
-		"value": 0
-	});
-	$("#raiseRangeSlider").attr({
-		"value": 0
-	});
 	console.log(JSON.stringify(data));
 	if (data.myBet == 0) {
 		$('#usernamesCards').text(data.username + " - My Cards");
@@ -111,7 +105,7 @@ socket.on("reveal", function (data) {
 	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>');
 	$('#blindStatus').text(data.hand);
 	$('#usernamesMoney').text('$' + data.money);
-	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand, 'buyIns': p.buyIns }) : '&nbsp;') }));
+	$('#opponentCards').html(data.cards.map(function (p) { return renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand, 'buyIns': p.buyIns }) }));
 });
 
 socket.on("endHand", function (data) {
@@ -135,7 +129,7 @@ socket.on("endHand", function (data) {
 		$("#usernameRaise").hide();
 	}
 	$('#usernamesMoney').text('$' + data.money);
-	$('#opponentCards').html(data.cards.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.text, 'money': p.money, 'blind': '', 'bets': data.bets }) : '&nbsp;') }));
+	$('#opponentCards').html(data.cards.map(function (p) { return renderOpponent(p.username, { 'text': p.text, 'money': p.money, 'blind': '', 'bets': data.bets }) }));
 });
 
 var beginHost = function () {
@@ -153,6 +147,7 @@ var beginHost = function () {
 }
 
 var joinRoom = function () {
+	// yes, i know this is client-side.
 	if ($('#joinName-field').val() == "" || $('#code-field').val() == "" || $('#joinName-field').val().length > 12) {
 		$('.toast').hide();
 		Materialize.toast('Enter a valid name/code! (max length of name is 12 characters.)', 4000);
@@ -282,10 +277,17 @@ function renderOpponentCard(card) {
 }
 
 function updateBetDisplay() {
-	$('#betDisplay').html('<h3 class="center-align">$' + $("#betRangeSlider").val() + '</h36>')
+	if ($("#betRangeSlider").val() == $("#usernamesMoney").text()) {
+		$('#betDisplay').html('<h3 class="center-align">All-In $' + $("#betRangeSlider").val() + '</h36>');
+	} else {
+		$('#betDisplay').html('<h3 class="center-align">$' + $("#betRangeSlider").val() + '</h36>');
+	}
+
 }
 
 function updateBetModal() {
+	$('#betDisplay').html('<h3 class="center-align">$0</h3>');
+	document.getElementById("betRangeSlider").value = 0;
 	var usernamesMoneyStr = $('#usernamesMoney').text().replace('$', '');
 	var usernamesMoneyNum = parseInt(usernamesMoneyStr);
 	$("#betRangeSlider").attr({
@@ -295,7 +297,7 @@ function updateBetModal() {
 }
 
 function updateRaiseDisplay() {
-	$('#raiseDisplay').html('<h3 class="center-align">Raise top bet to $' + $("#raiseRangeSlider").val() + '</h3>')
+	$('#raiseDisplay').html('<h3 class="center-align">Raise top bet to $' + $("#raiseRangeSlider").val() + '</h3>');
 }
 
 socket.on("updateRaiseModal", function (data) {
@@ -306,6 +308,7 @@ socket.on("updateRaiseModal", function (data) {
 });
 
 function updateRaiseModal() {
+	document.getElementById("raiseRangeSlider").value = 0;
 	socket.emit('raiseModalData', {});
 }
 
@@ -316,10 +319,10 @@ socket.on("displayPossibleMoves", function (data) {
 	else $("#usernameCheck").hide();
 	if (data.bet == 'yes') $("#usernameBet").show();
 	else $("#usernameBet").hide();
-	if (data.call == 'yes' || data.call == 'all-in') {
+	if (data.call != 'no' || data.call == 'all-in') {
 		$("#usernameCall").show();
 		if (data.call == 'all-in') $("#usernameCall").text('Call All-In');
-		else $("#usernameCall").text('Call')
+		else $("#usernameCall").text('Call $' + data.call);
 	} else $("#usernameCall").hide();
 	if (data.raise == 'yes') $("#usernameRaise").show();
 	else $("#usernameRaise").hide();

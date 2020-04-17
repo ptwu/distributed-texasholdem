@@ -145,7 +145,8 @@
 					<h4>Drag the slider to place your bet!</h4>
 				</div>
 				<p class="range-field">
-					<input type="range" id="betRangeSlider" min="0" max="100" value="0" onchange=updateBetDisplay() />
+					<input type="range" id="betRangeSlider" min="0" max="100" value="0" onchange="updateBetDisplay()"
+						oninput="updateBetDisplay()" />
 				</p>
 			</form>
 			<br />
