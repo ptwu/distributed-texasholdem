@@ -25,6 +25,7 @@ const Game = function (name, host) {
 	}(this);
 
 	this.startNewRound = () => {
+		this.lastMoveParsed = { 'move': '', 'player': '' };
 		this.roundInProgress = true;
 		this.foldPot = 0;
 		this.bigBlindWent = false;
@@ -121,7 +122,8 @@ const Game = function (name, host) {
 				'myMoney': this.players[pn].getMoney(),
 				'myBet': this.getPlayerBetInStage(this.players[pn]),
 				'myStatus': this.players[pn].getStatus(),
-				'myBlind': this.players[pn].getBlind()
+				'myBlind': this.players[pn].getBlind(),
+				'roundInProgress': this.roundInProgress
 			});
 		}
 	}
@@ -298,6 +300,7 @@ const Game = function (name, host) {
 			} else {
 				let currTurnIndex = 0;
 				//check if move just made was a fold
+				console.log(this.players);
 				if (this.lastMoveParsed.move == 'Fold') {
 					for (let i = 0; i < this.players.length; i++) {
 						if (this.players[i].username == this.lastMoveParsed.player.username) {

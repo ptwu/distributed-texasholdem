@@ -34,6 +34,7 @@ socket.on("hostRoom", function (data) {
 
 socket.on("joinRoom", function (data) {
 	if (data == undefined) {
+		$('#joinModal').closeModal();
 		Materialize.toast('Enter a valid name/code! (max length of name is 12 characters & cannot be the same as someone else\'s)', 4000);
 		$("#hostButton").removeClass("disabled");
 	} else {
@@ -61,8 +62,15 @@ socket.on("rerender", function (data) {
 	else $('#communityCards').html('<p></p>');
 	if (data.currBet == undefined) data.currBet = 0;
 	$('#table-title').text('Round ' + data.round + "    |    " + data.stage + "    |    Current Top Bet: $" + data.topBet + "    |    Pot: $" + data.pot);
-	$('#opponentCards').html(data.players.map(function (p) { return (p.username != data.username ? renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets }) : '&nbsp;') }));
+	$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets }) }));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets });
+	if (!data.roundInProgress) {
+		$("#usernameFold").hide();
+		$("#usernameCheck").hide();
+		$("#usernameBet").hide();
+		$("#usernameCall").hide();
+		$("#usernameRaise").hide();
+	}
 });
 
 socket.on("gameBegin", function (data) {
@@ -94,7 +102,7 @@ socket.on("reveal", function (data) {
 		}
 	}
 	$('#table-title').text('Hand Winner(s): ' + data.winners);
-	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Play Next Round</button>');
+	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>');
 	$('#blindStatus').text(data.hand);
 	$('#usernamesMoney').text('$' + data.money);
 	$('#opponentCards').html(data.cards.map(function (p) { return ((p.username != data.username) ? renderOpponentCards(p.username, { 'cards': p.cards, 'folded': p.folded, 'money': p.money, 'endHand': p.hand }) : '&nbsp;') }));
@@ -107,7 +115,7 @@ socket.on("endHand", function (data) {
 	$("#usernameCall").hide();
 	$("#usernameRaise").hide();
 	$('#table-title').text(data.winner + ' takes the pot of $' + data.pot);
-	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Play Next Round</button>');
+	$('#playNext').html('<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>');
 	$('#blindStatus').text('');
 	if (data.folded == 'Fold') {
 		$("#status").text('You Folded');
