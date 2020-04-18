@@ -84,7 +84,8 @@ socket.on("rerender", function (data) {
 	else $('#communityCards').html('<p></p>');
 	if (data.currBet == undefined) data.currBet = 0;
 	$('#table-title').text('Game ' + data.round + "    |    " + data.stage + "    |    Current Top Bet: $" + data.topBet + "    |    Pot: $" + data.pot);
-	$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets, 'buyIns': p.buyIns }) }));
+	$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets, 'buyIns': p.buyIns, 'isChecked': p.isChecked }) }));
+	console.log(JSON.stringify(data.players));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets, 'buyIns': data.buyIns });
 	if (!data.roundInProgress) {
 		$("#usernameFold").hide();
@@ -224,6 +225,7 @@ function renderCard(card) {
 }
 
 function renderOpponent(name, data) {
+	console.log(name + " is checked " + data.isChecked);
 	var bet = 0;
 	if (data.bets != undefined) {
 		var arr = data.bets[data.bets.length - 1];
@@ -238,13 +240,17 @@ function renderOpponent(name, data) {
 			return '<div class="col s12 m2 opponentCard"><div class="card grey"><div class="card-content white-text"><span class="card-title">' + name + ' (Fold)</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
 		} else {
 			if (data.text == 'Their Turn') {
-				if (bet == 0) {
+				if (data.isChecked)
+					return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + ' | Check</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
+				else if (bet == 0) {
 					return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
 				} else {
 					return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br /><br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
 				}
 			} else {
-				if (bet == 0) {
+				if (data.isChecked)
+					return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Check</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
+				else if (bet == 0) {
 					return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
 				} else {
 					return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + ' (' + data.buyIns + ' ' + buyInsText + ')' + '</div></div></div>';
@@ -256,13 +262,17 @@ function renderOpponent(name, data) {
 			return '<div class="col s12 m2 opponentCard"><div class="card grey"><div class="card-content white-text"><span class="card-title">' + name + ' (Fold)</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 		} else {
 			if (data.text == 'Their Turn') {
-				if (bet == 0) {
+				if (data.isChecked)
+					return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + ' | Check</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+				else if (bet == 0) {
 					return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 				} else {
 					return '<div class="col s12 m2 opponentCard"><div class="card green"><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br /><br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 				}
 			} else {
-				if (bet == 0) {
+				if (data.isChecked)
+					return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Check</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
+				else if (bet == 0) {
 					return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';
 				} else {
 					return '<div class="col s12 m2 opponentCard"><div class="card green darken-2" ><div class="card-content white-text"><span class="card-title">' + name + ' | Bet: $' + bet + '</span><p><div class="center-align"><div class="blankCard" id="opponent-card" /><div class="blankCard" id="opponent-card" /></div><br /><br /><br /><br /><br />' + data.blind + '<br />' + data.text + '</p></div><div class="card-action green darken-3 white-text center-align" style="font-size: 20px;">$' + data.money + '</div></div></div>';

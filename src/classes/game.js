@@ -120,8 +120,9 @@ const Game = function (name, host) {
 				'status': this.players[pn].getStatus(),
 				'blind': this.players[pn].getBlind(),
 				'money': this.players[pn].getMoney(),
-				'buyIns': this.players[pn].buyIns
-			})
+				'buyIns': this.players[pn].buyIns,
+				'isChecked': this.playerIsChecked(this.players[pn])
+			});
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit('rerender', {
@@ -193,6 +194,10 @@ const Game = function (name, host) {
 		} else {
 			return 'Error';
 		}
+	}
+
+	this.playerIsChecked = (playr) => {
+		return this.roundData.bets[this.roundData.bets.length - 1].some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
 	}
 
 	this.findFirstToGoPlayer = () => {
