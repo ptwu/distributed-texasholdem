@@ -77,6 +77,10 @@ code {
   margin: 2px;
 }
 
+.card-content {
+  font-size: 18px;
+}
+
 .theirTurn {
   border: 5px solid yellow;
 }
