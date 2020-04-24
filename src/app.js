@@ -135,11 +135,13 @@ io.on('connection', (socket) => {
 				}
 				game.moveOntoNextPlayer();
 			} else if (data.move == 'bet') {
-				const player = game.findPlayer(socket.id);
-				game.roundData.bets[game.roundData.bets.length - 1].push({ player: player.getUsername(), bet: data.bet });
-				player.money = player.money - data.bet;
-				if (player.money == 0) player.allIn = true;
-				game.moveOntoNextPlayer();
+				if (data.bet >= 2) {
+					const player = game.findPlayer(socket.id);
+					game.roundData.bets[game.roundData.bets.length - 1].push({ player: player.getUsername(), bet: data.bet });
+					player.money = player.money - data.bet;
+					if (player.money == 0) player.allIn = true;
+					game.moveOntoNextPlayer();
+				}
 			} else if (data.move == 'call') {
 				const player = game.findPlayer(socket.id);
 				let currBet = game.getPlayerBetInStage(player);

@@ -61,7 +61,6 @@ socket.on("joinRoom", function (data) {
 		$("#hostButton").removeClass("disabled");
 	} else {
 		$('#joinModalContent').html('<h5>' + data.host + '\'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game. Leaving the page, refreshing, or going back will disconnect you from the game. </p>');
-		$('#mainContent').empty();
 		$('#playersNamesJoined').html(data.players.map(function (p) {
 			return '<span>' + p + '</span><br />';
 		}));
@@ -71,6 +70,7 @@ socket.on("joinRoom", function (data) {
 socket.on("dealt", function (data) {
 	$('#mycards').html(data.cards.map(function (c) { return renderCard(c); }));
 	$('#usernamesCards').text(data.username + " - My Cards");
+	$('#mainContent').remove();
 });
 
 socket.on("rerender", function (data) {
@@ -196,6 +196,8 @@ var fold = function () {
 var bet = function () {
 	if (parseInt($("#betRangeSlider").val()) == 0) {
 		Materialize.toast('You must bet more than $0! Try again.', 4000);
+	} else if (parseInt($("#betRangeSlider").val()) < 2) {
+		Materialize.toast('The minimum bet is $2.', 4000);
 	} else {
 		socket.emit('moveMade', { move: 'bet', bet: parseInt($("#betRangeSlider").val()) });
 	}
