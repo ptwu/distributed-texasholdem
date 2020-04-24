@@ -110,11 +110,9 @@ io.on('connection', (socket) => {
 			if (data.move == 'fold') {
 				let preFoldBetAmount = 0;
 
-				for (let i = 0; i < game.roundData.bets.length; i++) {
-					let roundDataStage = game.roundData.bets[i].find(a => a.player == game.findPlayer(socket.id).username);
-					if (roundDataStage != undefined && roundDataStage.bet != 'Fold') {
-						preFoldBetAmount += roundDataStage.bet;
-					}
+				let roundDataStage = game.roundData.bets[game.roundData.bets.length - 1].find(a => a.player == game.findPlayer(socket.id).username);
+				if (roundDataStage != undefined && roundDataStage.bet != 'Fold') {
+					preFoldBetAmount += roundDataStage.bet;
 				}
 				game.findPlayer(socket.id).setStatus('Fold');
 				game.foldPot = game.foldPot + preFoldBetAmount;
