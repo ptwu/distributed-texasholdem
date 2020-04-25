@@ -74,7 +74,6 @@ socket.on("dealt", function (data) {
 });
 
 socket.on("rerender", function (data) {
-	console.log(JSON.stringify(data));
 	if (data.myBet == 0) {
 		$('#usernamesCards').text(data.username + " - My Cards");
 	} else {
@@ -85,7 +84,6 @@ socket.on("rerender", function (data) {
 	if (data.currBet == undefined) data.currBet = 0;
 	$('#table-title').text('Game ' + data.round + "    |    " + data.stage + "    |    Current Top Bet: $" + data.topBet + "    |    Pot: $" + data.pot);
 	$('#opponentCards').html(data.players.map(function (p) { return renderOpponent(p.username, { 'text': p.status, 'money': p.money, 'blind': p.blind, 'bets': data.bets, 'buyIns': p.buyIns, 'isChecked': p.isChecked }) }));
-	console.log(JSON.stringify(data.players));
 	renderSelf({ 'money': data.myMoney, 'text': data.myStatus, 'blind': data.myBlind, 'bets': data.bets, 'buyIns': data.buyIns });
 	if (!data.roundInProgress) {
 		$("#usernameFold").hide();
@@ -227,7 +225,6 @@ function renderCard(card) {
 }
 
 function renderOpponent(name, data) {
-	console.log(name + " is checked " + data.isChecked);
 	var bet = 0;
 	if (data.bets != undefined) {
 		var arr = data.bets[data.bets.length - 1];

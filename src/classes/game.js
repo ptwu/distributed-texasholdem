@@ -671,7 +671,7 @@ const Game = function (name, host) {
 		let allPlayersPresent = false;
 		let numUnfolded = 0;
 		for (let i = 0; i < this.players.length; i++) {
-			if (this.players[i].status != 'Fold') numUnfolded++;
+			if (this.players[i].status != 'Fold' && !this.players[i].allIn) numUnfolded++;
 		}
 		const currRound = this.roundData.bets[this.roundData.bets.length - 1];
 		if (this.roundData.bets.length == 1) {

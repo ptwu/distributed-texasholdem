@@ -135,6 +135,7 @@ io.on('connection', (socket) => {
 			} else if (data.move == 'bet') {
 				if (data.bet >= 2) {
 					const player = game.findPlayer(socket.id);
+					game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
 					game.roundData.bets[game.roundData.bets.length - 1].push({ player: player.getUsername(), bet: data.bet });
 					player.money = player.money - data.bet;
 					if (player.money == 0) player.allIn = true;
@@ -192,6 +193,7 @@ io.on('connection', (socket) => {
 				const player = game.findPlayer(socket.id);
 				if (player.getMoney() - (data.bet - currBet) >= 0) {
 					if (currBet === 0) {
+						game.roundData.bets[game.roundData.bets.length - 1] = game.roundData.bets[game.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
 						game.roundData.bets[game.roundData.bets.length - 1].push({ player: player.getUsername(), bet: data.bet });
 						player.money = player.money - data.bet;
 					} else {
