@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
 		if (game != undefined) {
 			if (game.findPlayer(socket.id).blindValue == 'Big Blind' && game.roundData.bets.length == 1) game.bigBlindWent = true;
 			if (data.move == 'fold') {
-				game.fold();
+				game.fold(socket);
 			} else if (data.move == 'check') {
 				game.check(socket);
 			} else if (data.move == 'bet') {
