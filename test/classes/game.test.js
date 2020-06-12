@@ -18,4 +18,6 @@ test('Test call until fold then check', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   game.startGame();
+
+  //console.log(game.getPlayersArray());
 });
