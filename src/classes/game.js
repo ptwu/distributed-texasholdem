@@ -709,7 +709,7 @@ const Game = function (name, host) {
 	this.getCode = () => { return this.gameName; };
 
 	this.addPlayer = (playerName, socket) => {
-		const player = new Player(playerName, socket);
+		const player = new Player(playerName, socket, this.debug);
 		this.players.push(player);
 		return player
 	};
