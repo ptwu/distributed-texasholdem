@@ -920,7 +920,7 @@ const Game = function (name, host) {
 		if (topBet != 0) {
 			possibleMoves.bet = 'no';
 			possibleMoves.check = 'no';
-			if (player.blindValue == 'Big Blind' && !this.bigBlindWent && topBet == 2) possibleMoves.check = 'yes';
+			if (player.blindValue == 'Big Blind' && !this.bigBlindWent && topBet == this.bigBlind) possibleMoves.check = 'yes';
 		} else {
 			possibleMoves.raise = 'no';
 		}
