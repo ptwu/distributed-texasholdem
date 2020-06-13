@@ -24,7 +24,7 @@ io.on('connection', (socket) => {
 			do {
 				code = "" + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10);
 			} while (rooms.length != 0 && (rooms.some(r => r.getCode == code)));
-			let game = new Game(code, data.username);
+			const game = new Game(code, data.username);
 			rooms.push(game);
 			game.addPlayer(data.username, socket);
 			game.emitPlayers('hostRoom', { 'code': code, 'players': game.getPlayersArray() });
@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('join', (data) => {
-		let game = rooms.find(r => r.getCode() === data.code);
+		const game = rooms.find(r => r.getCode() === data.code);
 		if ((game == undefined || game.getPlayersArray().some(p => p == data.username)) || data.username == undefined || data.username.length > 12) {
 			socket.emit('joinRoom', undefined);
 		} else {
@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('startGame', (data) => {
-		let game = rooms.find(r => r.getCode() == data.code);
+		const game = rooms.find(r => r.getCode() == data.code);
 		if (game == undefined) {
 			socket.emit('gameBegin', undefined);
 		} else {
@@ -54,15 +54,15 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('evaluatePossibleMoves', () => {
-		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		const game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game.roundInProgress) {
-			let possibleMoves = game.getPossibleMoves(socket);
+			const possibleMoves = game.getPossibleMoves(socket);
 			socket.emit('displayPossibleMoves', possibleMoves);
 		}
 	});
 
 	socket.on('raiseModalData', () => {
-		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		const game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game != undefined) {
 			socket.emit('updateRaiseModal', {
 				'topBet': game.getCurrentTopBet(),
@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('startNextRound', () => {
-		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		const game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game != undefined) {
 			if (game.roundInProgress === false) {
 				game.startNewRound();
@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
 	//precondition: user must be able to make the move in the first place.
 	socket.on('moveMade', (data) => {
 		//worst case complexity O(num_rooms * num_players_in_room)
-		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		const game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 
 		if (game != undefined) {
 			if (data.move == 'fold') {
@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('disconnect', () => {
-		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
+		const game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game != undefined) {
 			const player = game.findPlayer(socket.id);
 			game.disconnectPlayer(player);
