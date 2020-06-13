@@ -792,7 +792,14 @@ const Game = function (name, host) {
 		this.rerender();
 	}
 
+	this.checkBigBlindWent = (socket) => {
+		if (this.findPlayer(socket.id).blindValue == 'Big Blind' && this.roundData.bets.length == 1) {
+			this.bigBlindWent = true;
+		} 
+	}
+
 	this.fold = (socket) => {
+		this.checkBigBlindWent(socket);
 		let preFoldBetAmount = 0;
 
 		let roundDataStage = this.roundData.bets[this.roundData.bets.length - 1].find(a => a.player == this.findPlayer(socket.id).username);
@@ -811,6 +818,7 @@ const Game = function (name, host) {
 	}
 
 	this.call = (socket) => {
+		this.checkBigBlindWent(socket);
 		const player = this.findPlayer(socket.id);
 		let currBet = this.getPlayerBetInStage(player);
 		const topBet = this.getCurrentTopBet();
@@ -860,7 +868,8 @@ const Game = function (name, host) {
 	}
 
 	this.bet = (socket, bet) => {
-		if (bet >= 2) {
+		this.checkBigBlindWent(socket);
+		if (bet >= this.bigBlind) {
 			const player = this.findPlayer(socket.id);
 			this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
 			this.roundData.bets[this.roundData.bets.length - 1].push({ player: player.getUsername(), bet: bet });
@@ -871,6 +880,7 @@ const Game = function (name, host) {
 	}
 
 	this.check = (socket) => {
+		this.checkBigBlindWent(socket);
 		let currBet = 0;
 		if (this.roundData.bets[this.roundData.bets.length - 1].find(a => a.player == this.findPlayer(socket.id).username) != undefined) {
 			currBet = this.roundData.bets[this.roundData.bets.length - 1].find(a => a.player == this.findPlayer(socket.id).username).bet;
@@ -882,6 +892,7 @@ const Game = function (name, host) {
 	}
 
 	this.raise = (socket, bet) => {
+		this.checkBigBlindWent(socket);
 		const currBet = this.getPlayerBetInStage(this.findPlayer(socket.id));
 		const player = this.findPlayer(socket.id);
 		if (player.getMoney() - (bet - currBet) >= 0) {

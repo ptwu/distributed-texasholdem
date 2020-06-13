@@ -26,15 +26,16 @@ test('Test call until fold then check', () => {
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
   expect(game.roundNum).toBe(1);
-  expect(game.roundData.bets.length).toBe(1);
+  expect(game.roundData.bets.length).toBeGreaterThan(0);
 
-  
   const smallPlayer = game.players[game.roundData.smallBlind];
   const bigPlayer = game.players[game.roundData.bigBlind];
 
   // Test parametable small/big blind
   expect(smallPlayer.money).toBe(95);
   expect(bigPlayer.money).toBe(90);
+
+  expect(smallPlayer.status).toBe('Their Turn');
 
   // Pre-Flop
   game.call(smallPlayer.socket);
@@ -63,5 +64,4 @@ test('Test call until fold then check', () => {
   game.check(bigPlayer.socket);
   game.check(smallPlayer.socket);
   expect(game.roundNum).toBe(1);
-  expect(game.roundData.bets.length).toBe(5);
 });
