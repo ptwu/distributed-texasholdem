@@ -815,6 +815,7 @@ const Game = function (name, host) {
 		}
 		this.lastMoveParsed = { 'move': 'Fold', 'player': this.findPlayer(socket.id) };
 		this.moveOntoNextPlayer();
+		return true;
 	}
 
 	this.call = (socket) => {
@@ -849,6 +850,7 @@ const Game = function (name, host) {
 				}
 			}
 			this.moveOntoNextPlayer();
+			return true;
 		} else {
 			if (this.roundData.bets[this.roundData.bets.length - 1].some(a => a.player == player.getUsername())) {
 				if ((player.getMoney() + currBet) - topBet <= 0) {
@@ -861,6 +863,7 @@ const Game = function (name, host) {
 					player.money = player.money - (topBet - currBet);
 					this.moveOntoNextPlayer();
 				}
+				return true;
 			} else {
 				this.log('this should not happen');
 			}
@@ -871,11 +874,14 @@ const Game = function (name, host) {
 		this.checkBigBlindWent(socket);
 		if (bet >= this.bigBlind) {
 			const player = this.findPlayer(socket.id);
-			this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
-			this.roundData.bets[this.roundData.bets.length - 1].push({ player: player.getUsername(), bet: bet });
-			player.money = player.money - bet;
-			if (player.money == 0) player.allIn = true;
-			this.moveOntoNextPlayer();
+			if (player.getMoney() - bet >= 0) {
+				this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
+				this.roundData.bets[this.roundData.bets.length - 1].push({ player: player.getUsername(), bet: bet });
+				player.money = player.money - bet;
+				if (player.money == 0) player.allIn = true;
+				this.moveOntoNextPlayer();
+				return true;
+			}
 		}
 	}
 
@@ -889,6 +895,7 @@ const Game = function (name, host) {
 			this.roundData.bets[this.roundData.bets.length - 1].push({ player: this.findPlayer(socket.id).getUsername(), bet: currBet });
 		}
 		this.moveOntoNextPlayer();
+		return true;
 	}
 
 	this.raise = (socket, bet) => {
@@ -906,6 +913,7 @@ const Game = function (name, host) {
 			}
 			if (player.money == 0) player.allIn = true;
 			this.moveOntoNextPlayer();
+			return true;
 		}
 	}
 
