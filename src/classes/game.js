@@ -21,6 +21,7 @@ const Game = function (name, host) {
 	this.lastMoveParsed = { 'move': '', 'player': '' };
 	this.roundInProgress = false;
 	this.disconnectedPlayers = [];
+	this.autoBuyIns = true;
 	this.debug = false;
 
 	const constructor = function () {
@@ -88,10 +89,12 @@ const Game = function (name, host) {
 			this.players[goFirstIndex].setStatus('Their Turn');
 
 		}
-		for (player of this.players) {
-			if (player.getMoney() == 0) {
-				player.money = 100;
-				player.buyIns = player.buyIns + 1;
+		if (this.autoBuyIns) {
+			for (player of this.players) {
+				if (player.getMoney() == 0) {
+					player.money = 100;
+					player.buyIns = player.buyIns + 1;
+				}
 			}
 		}
 
