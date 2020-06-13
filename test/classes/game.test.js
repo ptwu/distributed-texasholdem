@@ -214,6 +214,67 @@ test('Test all-in / call', () => {
   expect(smallPlayer.money + bigPlayer.money).toBe(150);
 });
 
+test('Test all-in 3 players', () => {
+  const game = new Game('best-game', '1');
+  game.smallBlind = 5;
+  game.bigBlind = 10;
+
+  // Mock socket
+  const sock1 = new events.EventEmitter();
+  sock1.id = 1;
+  const sock2 = new events.EventEmitter();
+  sock2.id = 2;
+  const sock3 = new events.EventEmitter();
+  sock3.id = 3;
+
+  const p1 = game.addPlayer("1", sock1);
+  p1.money = 50;
+  expect(p1.money).toBe(50);
+  const p2 = game.addPlayer("2", sock2);
+  expect(p2.money).toBe(100);
+  const p3 = game.addPlayer("3", sock3);
+  expect(p3.money).toBe(100);
+
+  expect(game.findPlayer(1)).toBe(p1);
+  expect(game.findPlayer(2)).toBe(p2);
+  expect(game.findPlayer(3)).toBe(p3);
+
+  expect(game.players.length).toBe(3);
+  
+  expect(game.roundNum).toBe(0);
+  expect(game.roundData.bets.length).toBe(0);
+  game.startGame();
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBeGreaterThan(0);
+
+  const smallPlayer = game.players[game.roundData.smallBlind];
+  const bigPlayer = game.players[game.roundData.bigBlind];
+  const thirdPlayer = game.players.filter((p) => [smallPlayer, bigPlayer].indexOf(p) === -1)[0];
+
+  let currentPlayer;
+  
+  // Pre-Flop
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(1);
+
+  // Flop
+  game.check(bigPlayer.socket);
+  game.check(smallPlayer.socket);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(2);
+
+  // Turn
+  expect(game.bet(bigPlayer.socket, bigPlayer.money)).toBe(true);
+
+  expect(game.call(smallPlayer.socket)).toBe(true);
+
+  expect(game.players.reduce((a, c) => a + c.money, 0)).toBe(250);
+});
+
 test('Test disconnected', () => {
   const game = new Game('best-game', '1');
   game.smallBlind = 5;
