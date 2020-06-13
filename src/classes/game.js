@@ -23,6 +23,8 @@ const Game = function (name, host) {
 	this.disconnectedPlayers = [];
 	this.autoBuyIns = true;
 	this.debug = false;
+	this.smallBlind = 1;
+	this.bigBlind = 2;
 
 	const constructor = function () {
 	}(this);
@@ -100,22 +102,22 @@ const Game = function (name, host) {
 
 		// handle big and small blind initial forced bets
 
-		if (this.players[bigBlindIndex].money < 2) {
+		if (this.players[bigBlindIndex].money < this.bigBlind) {
 			this.players[bigBlindIndex].money = 0;
 			this.players[bigBlindIndex].allIn = true;
-			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 1 }]);
+			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: this.bigBlind - this.players[bigBlindIndex].money }]);
 		} else {
-			this.players[bigBlindIndex].money = this.players[bigBlindIndex].money - 2;
-			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: 2 }]);
+			this.players[bigBlindIndex].money = this.players[bigBlindIndex].money - this.bigBlind;
+			this.roundData.bets.push([{ player: this.players[bigBlindIndex].getUsername(), bet: this.bigBlind }]);
 		}
 
-		if (this.players[smallBlindIndex].money == 1) {
+		if (this.players[smallBlindIndex].money == this.smallBlind) {
 			this.players[smallBlindIndex].money = 0;
-			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: 1 });
+			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: this.smallBlind - this.players[bigBlindIndex].money });
 			this.players[smallBlindIndex].allIn = true;
 		} else {
-			this.players[smallBlindIndex].money = this.players[smallBlindIndex].money - 1;
-			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: 1 });
+			this.players[smallBlindIndex].money = this.players[smallBlindIndex].money - this.smallBlind;
+			this.roundData.bets[0].push({ player: this.players[smallBlindIndex].getUsername(), bet: this.smallBlind });
 		}
 
 		this.roundNum++;
