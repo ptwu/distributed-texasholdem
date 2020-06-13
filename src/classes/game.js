@@ -893,6 +893,31 @@ const Game = function (name, host) {
 		}
 	}
 
+	this.getPossibleMoves = (socket) => {
+		const player = this.findPlayer(socket.id);
+		const playerBet = this.getPlayerBetInStage(player);
+		const topBet = this.getCurrentTopBet();
+		let possibleMoves = { fold: 'yes', check: 'yes', bet: 'yes', call: topBet, raise: 'yes' }
+		if (player.getStatus() == 'Fold') {
+			this.log('Error: Folded players should not be able to move.');
+		}
+		if (topBet != 0) {
+			possibleMoves.bet = 'no';
+			possibleMoves.check = 'no';
+			if (player.blindValue == 'Big Blind' && !this.bigBlindWent && topBet == 2) possibleMoves.check = 'yes';
+		} else {
+			possibleMoves.raise = 'no';
+		}
+		if (topBet <= playerBet) {
+			possibleMoves.call = 'no';
+		}
+		if (topBet >= player.getMoney() + playerBet) {
+			possibleMoves.raise = 'no';
+			possibleMoves.call = 'all-in';
+		}
+		return possibleMoves;
+	}
+
 };
 
 module.exports = Game;

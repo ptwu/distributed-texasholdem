@@ -56,27 +56,7 @@ io.on('connection', (socket) => {
 	socket.on('evaluatePossibleMoves', () => {
 		let game = rooms.find(r => r.findPlayer(socket.id).socket.id === socket.id);
 		if (game.roundInProgress) {
-			const player = game.findPlayer(socket.id);
-			const playerBet = game.getPlayerBetInStage(player);
-			const topBet = game.getCurrentTopBet();
-			let possibleMoves = { fold: 'yes', check: 'yes', bet: 'yes', call: topBet, raise: 'yes' }
-			if (player.getStatus() == 'Fold') {
-				console.log('Error: Folded players should not be able to move.');
-			}
-			if (topBet != 0) {
-				possibleMoves.bet = 'no';
-				possibleMoves.check = 'no';
-				if (player.blindValue == 'Big Blind' && !game.bigBlindWent && topBet == 2) possibleMoves.check = 'yes';
-			} else {
-				possibleMoves.raise = 'no';
-			}
-			if (topBet <= playerBet) {
-				possibleMoves.call = 'no';
-			}
-			if (topBet >= player.getMoney() + playerBet) {
-				possibleMoves.raise = 'no';
-				possibleMoves.call = 'all-in';
-			}
+			let possibleMoves = game.getPossibleMoves(socket);
 			socket.emit('displayPossibleMoves', possibleMoves);
 		}
 	});
