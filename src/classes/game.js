@@ -209,7 +209,7 @@ const Game = function (name, host) {
 	}
 
 	this.playerIsChecked = (playr) => {
-		return this.roundData.bets[this.roundData.bets.length - 1].some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
+		return this.roundData.bets && this.roundData.bets[this.roundData.bets.length - 1].some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
 	}
 
 	this.findFirstToGoPlayer = () => {
