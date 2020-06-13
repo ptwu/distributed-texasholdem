@@ -780,7 +780,7 @@ const Game = function (name, host) {
 		if (player.getStatus() == 'Their Turn') {
 			this.moveOntoNextPlayer();
 		}
-		this.players = this.players.filter(a => a != player);
+		this.players = this.players.filter(a => a !== player);
 		if (player == this.host) {
 			if (this.players.length > 0) {
 				this.host = this.players[0].getUsername();
