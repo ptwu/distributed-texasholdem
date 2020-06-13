@@ -444,7 +444,7 @@ const Game = function (name, host) {
 				}
 				for (let i = 0; i < this.roundData.bets[3].length; i++) {
 					if (sidepot4.some(a => this.roundData.bets[3][i].bet == a.bet)) {
-						for (let j = 0; j < sidepot3.length; j++) {
+						for (let j = 0; j < sidepot4.length; j++) {
 							if (sidepot4[j].bet == this.roundData.bets[3][i].bet) {
 								let pot = sidepot4[j];
 								pot.players.push(this.roundData.bets[3][i].player);
