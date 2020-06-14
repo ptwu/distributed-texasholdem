@@ -166,8 +166,8 @@ const Game = function (name, host) {
 
 	this.getPlayerBetInStage = (player) => {
 		if (this.roundData.bets == undefined || this.roundData.bets.length == 0 ||
-			this.roundData.bets[this.roundData.bets.length - 1] == undefined) return 0;
-		const stageData = this.roundData.bets[this.roundData.bets.length - 1];
+			this.getCurrentRoundBets() == undefined) return 0;
+		const stageData = this.getCurrentRoundBets();
 		let totalBetInStage = 0;
 
 		for (let j = 0; j < stageData.length; j++) {
@@ -206,7 +206,7 @@ const Game = function (name, host) {
 	}
 
 	this.playerIsChecked = (playr) => {
-		return this.roundData.bets && this.roundData.bets[this.roundData.bets.length - 1].some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
+		return this.roundData.bets && this.getCurrentRoundBets().some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
 	}
 
 	this.findFirstToGoPlayer = () => {
@@ -223,7 +223,7 @@ const Game = function (name, host) {
 
 	this.moveOntoNextPlayer = () => {
 		let handOver = false;
-		this.log(this.roundData.bets[this.roundData.bets.length - 1]);
+		this.log(this.getCurrentRoundBets());
 		if (this.isStageComplete()) {
 			this.log('stage complete');
 			if (this.allPlayersAllIn()) {
@@ -718,7 +718,7 @@ const Game = function (name, host) {
 		for (let i = 0; i < this.players.length; i++) {
 			if (this.players[i].status != 'Fold' && !this.players[i].allIn) numUnfolded++;
 		}
-		const currRound = this.roundData.bets[this.roundData.bets.length - 1];
+		const currRound = this.getCurrentRoundBets();
 		if (this.roundData.bets.length == 1) {
 			allPlayersPresent = (currRound.filter(a => a.bet != 'Fold').length >= numUnfolded) && this.bigBlindWent;
 		} else {
@@ -831,20 +831,28 @@ const Game = function (name, host) {
 		} 
 	}
 
+	this.getCurrentRoundBets = () => {
+		return this.roundData.bets[this.roundData.bets.length - 1];
+	}
+
+	this.setCurrentRoundBets = (bets) => {
+		return this.roundData.bets[this.roundData.bets.length - 1] = bets;
+	}
+
 	this.fold = (socket) => {
 		this.checkBigBlindWent(socket);
 		let preFoldBetAmount = 0;
 
-		let roundDataStage = this.roundData.bets[this.roundData.bets.length - 1].find(a => a.player == this.findPlayer(socket.id).username);
+		let roundDataStage = this.getCurrentRoundBets().find(a => a.player == this.findPlayer(socket.id).username);
 		if (roundDataStage != undefined && roundDataStage.bet != 'Fold') {
 			preFoldBetAmount += roundDataStage.bet;
 		}
 		this.findPlayer(socket.id).setStatus('Fold');
 		this.foldPot = this.foldPot + preFoldBetAmount;
-		if (this.roundData.bets[this.roundData.bets.length - 1].some(a => a.player == this.findPlayer(socket.id).username)) {
-			this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: 'Fold' } : a);
+		if (this.getCurrentRoundBets().some(a => a.player == this.findPlayer(socket.id).username)) {
+			this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: 'Fold' } : a));
 		} else {
-			this.roundData.bets[this.roundData.bets.length - 1].push({ player: this.findPlayer(socket.id).getUsername(), bet: 'Fold' });
+			this.getCurrentRoundBets().push({ player: this.findPlayer(socket.id).getUsername(), bet: 'Fold' });
 		}
 		this.lastMoveParsed = { 'move': 'Fold', 'player': this.findPlayer(socket.id) };
 		this.moveOntoNextPlayer();
@@ -857,25 +865,25 @@ const Game = function (name, host) {
 		let currBet = this.getPlayerBetInStage(player);
 		const topBet = this.getCurrentTopBet();
 		if (currBet === 0) {
-			if (this.roundData.bets[this.roundData.bets.length - 1].some(a => a.player == player.getUsername())) {
+			if (this.getCurrentRoundBets().some(a => a.player == player.getUsername())) {
 				if (player.getMoney() - topBet <= 0) {
-					this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: player.getMoney() } : a);
+					this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: player.getMoney() } : a));
 					player.money = 0;
 					player.allIn = true;
 				} else {
-					this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: topBet } : a);
+					this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: topBet } : a));
 					player.money = player.money - topBet;
 				}
 			} else {
 				if (player.getMoney() - topBet <= 0) {
-					this.roundData.bets[this.roundData.bets.length - 1].push({
+					this.getCurrentRoundBets().push({
 						player: player.getUsername(),
 						bet: player.getMoney()
 					});
 					player.money = 0;
 					player.allIn = true;
 				} else {
-					this.roundData.bets[this.roundData.bets.length - 1].push({
+					this.getCurrentRoundBets().push({
 						player: player.getUsername(),
 						bet: topBet
 					});
@@ -885,14 +893,14 @@ const Game = function (name, host) {
 			this.moveOntoNextPlayer();
 			return true;
 		} else {
-			if (this.roundData.bets[this.roundData.bets.length - 1].some(a => a.player == player.getUsername())) {
+			if (this.getCurrentRoundBets().some(a => a.player == player.getUsername())) {
 				if ((player.getMoney() + currBet) - topBet <= 0) {
-					this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: player.getMoney() + currBet } : a);
+					this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: player.getMoney() + currBet } : a));
 					player.money = 0;
 					player.allIn = true;
 					this.moveOntoNextPlayer();
 				} else {
-					this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: topBet } : a);
+					this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: topBet } : a));
 					player.money = player.money - (topBet - currBet);
 					this.moveOntoNextPlayer();
 				}
@@ -908,8 +916,8 @@ const Game = function (name, host) {
 		if (bet >= this.bigBlind) {
 			const player = this.findPlayer(socket.id);
 			if (player.getMoney() - bet >= 0) {
-				this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
-				this.roundData.bets[this.roundData.bets.length - 1].push({ player: player.getUsername(), bet: bet });
+				this.setCurrentRoundBets(this.getCurrentRoundBets().filter(a => a.player != player.getUsername()));
+				this.getCurrentRoundBets().push({ player: player.getUsername(), bet: bet });
 				player.money = player.money - bet;
 				if (player.money == 0) player.allIn = true;
 				this.moveOntoNextPlayer();
@@ -921,11 +929,11 @@ const Game = function (name, host) {
 	this.check = (socket) => {
 		this.checkBigBlindWent(socket);
 		let currBet = 0;
-		if (this.roundData.bets[this.roundData.bets.length - 1].find(a => a.player == this.findPlayer(socket.id).username) != undefined) {
-			currBet = this.roundData.bets[this.roundData.bets.length - 1].find(a => a.player == this.findPlayer(socket.id).username).bet;
-			this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: currBet } : a);
+		if (this.getCurrentRoundBets().find(a => a.player == this.findPlayer(socket.id).username) != undefined) {
+			currBet = this.getCurrentRoundBets().find(a => a.player == this.findPlayer(socket.id).username).bet;
+			this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: currBet } : a));
 		} else {
-			this.roundData.bets[this.roundData.bets.length - 1].push({ player: this.findPlayer(socket.id).getUsername(), bet: currBet });
+			this.getCurrentRoundBets().push({ player: this.findPlayer(socket.id).getUsername(), bet: currBet });
 		}
 		this.moveOntoNextPlayer();
 		return true;
@@ -934,16 +942,17 @@ const Game = function (name, host) {
 	this.raise = (socket, bet) => {
 		this.checkBigBlindWent(socket);
 		const currBet = this.getPlayerBetInStage(this.findPlayer(socket.id));
+		const topBet = this.getCurrentTopBet();
 		const player = this.findPlayer(socket.id);
-		if (player.getMoney() - (bet - currBet) >= 0) {
+		const moneyToRemove = bet - currBet;
+		if (moneyToRemove > 0 && bet >= topBet && player.getMoney() - moneyToRemove >= 0) {
 			if (currBet === 0) {
-				this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].filter(a => a.player != player.getUsername());
-				this.roundData.bets[this.roundData.bets.length - 1].push({ player: player.getUsername(), bet: bet });
-				player.money = player.money - bet;
+				this.setCurrentRoundBets(this.getCurrentRoundBets().filter(a => a.player != player.getUsername()));
+				this.getCurrentRoundBets().push({ player: player.getUsername(), bet: bet });
 			} else {
-				this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == player.getUsername() ? { player: player.getUsername(), bet: bet } : a);
-				player.money = player.money - (bet - currBet);
+				this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == player.getUsername() ? { player: player.getUsername(), bet: bet } : a));
 			}
+			player.money -= moneyToRemove;
 			if (player.money == 0) player.allIn = true;
 			this.moveOntoNextPlayer();
 			return true;
