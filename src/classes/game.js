@@ -906,16 +906,17 @@ const Game = function (name, host) {
 	this.raise = (socket, bet) => {
 		this.checkBigBlindWent(socket);
 		const currBet = this.getPlayerBetInStage(this.findPlayer(socket.id));
+		const topBet = this.getCurrentTopBet();
 		const player = this.findPlayer(socket.id);
-		if (player.getMoney() - (bet - currBet) >= 0) {
+		const moneyToRemove = bet - currBet;
+		if (moneyToRemove > 0 && bet >= topBet && player.getMoney() - moneyToRemove >= 0) {
 			if (currBet === 0) {
 				this.setCurrentRoundBets(this.getCurrentRoundBets().filter(a => a.player != player.getUsername()));
 				this.getCurrentRoundBets().push({ player: player.getUsername(), bet: bet });
-				player.money = player.money - bet;
 			} else {
 				this.setCurrentRoundBets(this.getCurrentRoundBets().map(a => a.player == player.getUsername() ? { player: player.getUsername(), bet: bet } : a));
-				player.money = player.money - (bet - currBet);
 			}
+			player.money -= moneyToRemove;
 			if (player.money == 0) player.allIn = true;
 			this.moveOntoNextPlayer();
 			return true;
