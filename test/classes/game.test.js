@@ -228,10 +228,10 @@ test('Test all-in 3 players', () => {
   sock3.id = 3;
 
   const p1 = game.addPlayer("1", sock1);
-  p1.money = 50;
-  expect(p1.money).toBe(50);
+  expect(p1.money).toBe(100);
   const p2 = game.addPlayer("2", sock2);
-  expect(p2.money).toBe(100);
+  p2.money = 50;
+  expect(p2.money).toBe(50);
   const p3 = game.addPlayer("3", sock3);
   expect(p3.money).toBe(100);
 
@@ -271,7 +271,7 @@ test('Test all-in 3 players', () => {
 
   // Turn
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
-  expect(game.bet(currentPlayer.socket, bigPlayer.money)).toBe(true);
+  expect(game.bet(currentPlayer.socket, currentPlayer.money)).toBe(true);
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
   expect(game.call(currentPlayer.socket)).toBe(true);
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
