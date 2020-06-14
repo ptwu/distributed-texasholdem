@@ -293,27 +293,39 @@ test('Test init blind and dealer', () => {
   expect(game.roundNum).toBe(1);
 
   expect(p1.dealer).toBe(true);
+  expect(p2.dealer).toBe(false);
+  expect(p3.dealer).toBe(false);
+  expect(p1.blindValue).toBe('');
   expect(p2.blindValue).toBe('Small Blind');
   expect(p3.blindValue).toBe('Big Blind');
 
   game.startNewRound();
   expect(game.roundNum).toBe(2);
 
+  expect(p1.dealer).toBe(false);
   expect(p2.dealer).toBe(true);
-  expect(p3.blindValue).toBe('Small Blind');
+  expect(p3.dealer).toBe(false);
   expect(p1.blindValue).toBe('Big Blind');
+  expect(p2.blindValue).toBe('');
+  expect(p3.blindValue).toBe('Small Blind');
 
   game.startNewRound();
   expect(game.roundNum).toBe(3);
 
+  expect(p1.dealer).toBe(false);
+  expect(p2.dealer).toBe(false);
   expect(p3.dealer).toBe(true);
   expect(p1.blindValue).toBe('Small Blind');
   expect(p2.blindValue).toBe('Big Blind');
+  expect(p3.blindValue).toBe('');
 
   game.startNewRound();
   expect(game.roundNum).toBe(4);
 
   expect(p1.dealer).toBe(true);
+  expect(p2.dealer).toBe(false);
+  expect(p3.dealer).toBe(false);
+  expect(p1.blindValue).toBe('');
   expect(p2.blindValue).toBe('Small Blind');
   expect(p3.blindValue).toBe('Big Blind');
 });
