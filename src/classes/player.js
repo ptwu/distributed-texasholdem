@@ -1,4 +1,4 @@
-const Player = function (playerName, socket) {
+const Player = function (playerName, socket, debug) {
 	this.username = playerName;
 	this.cards = [];
 	this.socket = socket;
@@ -9,12 +9,19 @@ const Player = function (playerName, socket) {
 	this.blindValue = '';
 	this.allIn = false;
 	this.goAgainStatus = false;
+	this.debug = debug || false;
 
 	const constructor = function () { }(this);
 
 	this.addCard = (card) => {
 		this.cards.push(card);
 	};
+
+	this.log = () => {
+		if (this.debug) {
+			console.log(...arguments);
+		}
+	}
 
 	this.setStatus = (data) => this.status = data;
 	this.setBlind = (data) => this.blindValue = data;
@@ -34,11 +41,11 @@ const Player = function (playerName, socket) {
 			cardsMsg += this.cards[i].getValue() + " " + this.cards[i].getSuit() + ', ';
 		}
 
-		console.log('----------------- PLAYER');
-		console.log('Username:', this.username);
-		console.log(cardsMsg);
-		console.log('SocketID: ', this.socket.id);
-		console.log('----------------- PLAYER');
+		this.log('----------------- PLAYER');
+		this.log('Username:', this.username);
+		this.log(cardsMsg);
+		this.log('SocketID: ', this.socket.id);
+		this.log('----------------- PLAYER');
 	};
 
 };
