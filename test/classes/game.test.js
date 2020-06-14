@@ -262,17 +262,23 @@ test('Test all-in 3 players', () => {
   expect(game.roundData.bets.length).toBe(1);
 
   // Flop
-  game.check(bigPlayer.socket);
-  game.check(smallPlayer.socket);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  game.check(currentPlayer.socket);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  game.check(currentPlayer.socket);
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(2);
 
   // Turn
-  expect(game.bet(bigPlayer.socket, bigPlayer.money)).toBe(true);
-
-  expect(game.call(smallPlayer.socket)).toBe(true);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.bet(currentPlayer.socket, bigPlayer.money)).toBe(true);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
 
   expect(game.players.reduce((a, c) => a + c.money, 0)).toBe(250);
+  expect(game.roundData.bets.length).toBe(4);
 });
 
 test('Test disconnected', () => {

@@ -391,7 +391,7 @@ const Game = function (name, host) {
 		const numWinners = winners.length;
 		const potTotal = this.getCurrentPot();
 		const potEligible = Math.floor(potTotal / numWinners);
-		for (winner of winners) {
+		for (const winner of winners) {
 			if (winner.allIn || winner.getMoney() == 0) {
 				// calculate what all-in player is eligible for (side pot calculation).
 				// returns money to players
@@ -461,7 +461,7 @@ const Game = function (name, host) {
 				this.log('sidepot 4 ' + JSON.stringify(sidepot4));
 				let winnings = 0;
 				//NOTE: does not handle more than two winners correctly yet
-				for (pot of sidepot1) {
+				for (const pot of sidepot1) {
 					if (pot.players.includes(winner.getUsername())) {
 						if (winners.length == 1)
 							winnings += pot.bet * pot.players.length;
@@ -471,7 +471,7 @@ const Game = function (name, host) {
 							}
 						}
 					} else {
-						for (player of pot.players) {
+						for (const player of pot.players) {
 							//return money
 							let playerObj = this.players.find(a => a.getUsername() == player);
 							if (playerObj == undefined) { this.log('yikes'); break; }
@@ -484,7 +484,7 @@ const Game = function (name, host) {
 						}
 					}
 				}
-				for (pot of sidepot2) {
+				for (const pot of sidepot2) {
 					if (pot.players.includes(winner.getUsername())) {
 						if (winners.length == 1)
 							winnings += pot.bet * pot.players.length;
@@ -494,7 +494,7 @@ const Game = function (name, host) {
 							}
 						}
 					} else {
-						for (player of pot.players) {
+						for (const player of pot.players) {
 							//return money
 							let playerObj = this.players.find(a => a.getUsername() == player);
 							if (playerObj == undefined) { this.log('yikes'); break; }
@@ -507,7 +507,7 @@ const Game = function (name, host) {
 						}
 					}
 				}
-				for (pot of sidepot3) {
+				for (const pot of sidepot3) {
 					if (pot.players.includes(winner.getUsername())) {
 						if (winners.length == 1)
 							winnings += pot.bet * pot.players.length;
@@ -517,7 +517,7 @@ const Game = function (name, host) {
 							}
 						}
 					} else {
-						for (player of pot.players) {
+						for (const player of pot.players) {
 							//return money
 							let playerObj = this.players.find(a => a.getUsername() == player);
 							if (playerObj == undefined) { this.log('yikes'); break; }
@@ -530,7 +530,7 @@ const Game = function (name, host) {
 						}
 					}
 				}
-				for (pot of sidepot4) {
+				for (const pot of sidepot4) {
 					if (pot.players.includes(winner.getUsername())) {
 						if (winners.length == 1)
 							winnings += pot.bet * pot.players.length;
@@ -540,7 +540,7 @@ const Game = function (name, host) {
 							}
 						}
 					} else {
-						for (player of pot.players) {
+						for (const player of pot.players) {
 							//return money
 							let playerObj = this.players.find(a => a.getUsername() == player);
 							if (playerObj == undefined) { this.log('yikes'); break; }
@@ -854,10 +854,10 @@ const Game = function (name, host) {
 		} else {
 			if (this.roundData.bets[this.roundData.bets.length - 1].some(a => a.player == player.getUsername())) {
 				if ((player.getMoney() + currBet) - topBet <= 0) {
-					player.allIn = true;
 					this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: player.getMoney() + currBet } : a);
-					this.moveOntoNextPlayer();
 					player.money = 0;
+					player.allIn = true;
+					this.moveOntoNextPlayer();
 				} else {
 					this.roundData.bets[this.roundData.bets.length - 1] = this.roundData.bets[this.roundData.bets.length - 1].map(a => a.player == this.findPlayer(socket.id).username ? { player: this.findPlayer(socket.id).getUsername(), bet: topBet } : a);
 					player.money = player.money - (topBet - currBet);
