@@ -440,3 +440,207 @@ test('Test raise', () => {
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(2);
 });
+
+test('Test all-in 3 players low credits win', () => {
+  const game = new Game('best-game', '1');
+  game.smallBlind = 5;
+  game.bigBlind = 10;
+
+  // Mock socket
+  const sock1 = new events.EventEmitter();
+  sock1.id = 1;
+  const sock2 = new events.EventEmitter();
+  sock2.id = 2;
+  const sock3 = new events.EventEmitter();
+  sock3.id = 3;
+
+  const p1 = game.addPlayer("1", sock1);
+  expect(p1.money).toBe(100);
+
+  const p2 = game.addPlayer("2", sock2);
+  expect(p2.money).toBe(100);
+
+  const p3 = game.addPlayer("3", sock3);
+  p3.money = 50;
+  expect(p3.money).toBe(50);
+
+  expect(game.findPlayer(1)).toBe(p1);
+  expect(game.findPlayer(2)).toBe(p2);
+  expect(game.findPlayer(3)).toBe(p3);
+
+  expect(game.players.length).toBe(3);
+  
+  expect(game.roundNum).toBe(0);
+  expect(game.roundData.bets.length).toBe(0);
+  game.startGame();
+
+
+  p1.cards[0].value = 7;
+  p1.cards[0].suit = '♠';
+  p1.cards[1].value = 7;
+  p1.cards[1].suit = '♥';
+
+  p2.cards[0].value = 8;
+  p2.cards[0].suit = '♠';
+  p2.cards[1].value = 8;
+  p2.cards[1].suit = '♥';
+
+  p3.cards[0].value = 1;
+  p3.cards[0].suit = '♠';
+  p3.cards[1].value = 1;
+  p3.cards[1].suit = '♥';
+
+
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBeGreaterThan(0);
+
+  let currentPlayer;
+  
+  // Pre-Flop
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(1);
+
+  // Flop
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  game.check(currentPlayer.socket);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  game.check(currentPlayer.socket);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(2);
+
+  game.community[0].value = 1;
+  game.community[0].suit = '♦';
+  game.community[1].value = 1;
+  game.community[1].suit = '♣';
+  game.community[2].value = 'K';
+  game.community[2].suit = '♣';
+
+  // Turn
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(currentPlayer.money).toBe(90);
+  expect(game.bet(currentPlayer.socket, currentPlayer.money)).toBe(true);
+  expect(currentPlayer.money).toBe(0);
+
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(currentPlayer.money).toBe(40);
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  expect(currentPlayer.money).toBe(0);
+
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(currentPlayer.money).toBe(90);
+  expect(game.call(currentPlayer.socket)).toBe(true);
+
+  // Winner has to be p3 with 4 as
+  expect(p1.money).toBe(45);
+  expect(p2.money).toBe(45);
+  expect(p3.money).toBe(160);
+
+  expect(game.players.reduce((a, c) => a + c.money, 0)).toBe(250);
+  expect(game.roundData.bets.length).toBe(4);
+});
+
+test('Test all-in 3 players high credits win', () => {
+  const game = new Game('best-game', '1');
+  game.smallBlind = 5;
+  game.bigBlind = 10;
+
+  // Mock socket
+  const sock1 = new events.EventEmitter();
+  sock1.id = 1;
+  const sock2 = new events.EventEmitter();
+  sock2.id = 2;
+  const sock3 = new events.EventEmitter();
+  sock3.id = 3;
+
+  const p1 = game.addPlayer("1", sock1);
+  expect(p1.money).toBe(100);
+
+  const p2 = game.addPlayer("2", sock2);
+  expect(p2.money).toBe(100);
+
+  const p3 = game.addPlayer("3", sock3);
+  p3.money = 50;
+  expect(p3.money).toBe(50);
+
+  expect(game.findPlayer(1)).toBe(p1);
+  expect(game.findPlayer(2)).toBe(p2);
+  expect(game.findPlayer(3)).toBe(p3);
+
+  expect(game.players.length).toBe(3);
+  
+  expect(game.roundNum).toBe(0);
+  expect(game.roundData.bets.length).toBe(0);
+  game.startGame();
+
+
+  p1.cards[0].value = 7;
+  p1.cards[0].suit = '♠';
+  p1.cards[1].value = 7;
+  p1.cards[1].suit = '♥';
+
+  p2.cards[0].value = 1;
+  p2.cards[0].suit = '♠';
+  p2.cards[1].value = 1;
+  p2.cards[1].suit = '♥';
+
+  p3.cards[0].value = 8;
+  p3.cards[0].suit = '♠';
+  p3.cards[1].value = 8;
+  p3.cards[1].suit = '♥';
+
+
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBeGreaterThan(0);
+
+  let currentPlayer;
+  
+  // Pre-Flop
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(1);
+
+  // Flop
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  game.check(currentPlayer.socket);
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  game.check(currentPlayer.socket);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(2);
+
+  game.community[0].value = 1;
+  game.community[0].suit = '♦';
+  game.community[1].value = 1;
+  game.community[1].suit = '♣';
+  game.community[2].value = 'K';
+  game.community[2].suit = '♣';
+
+  // Turn
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(currentPlayer.money).toBe(90);
+  expect(game.bet(currentPlayer.socket, currentPlayer.money)).toBe(true);
+  expect(currentPlayer.money).toBe(0);
+
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(currentPlayer.money).toBe(40);
+  expect(game.call(currentPlayer.socket)).toBe(true);
+  expect(currentPlayer.money).toBe(0);
+
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(currentPlayer.money).toBe(90);
+  expect(game.call(currentPlayer.socket)).toBe(true);
+
+  // Winner has to be p2 with 4 as
+  expect(p1.money).toBe(0);
+  expect(p2.money).toBe(210);
+  expect(p3.money).toBe(40);
+
+  expect(game.players.reduce((a, c) => a + c.money, 0)).toBe(250);
+  expect(game.roundData.bets.length).toBe(4);
+});

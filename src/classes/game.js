@@ -583,9 +583,9 @@ const Game = function (name, host) {
 		this.log('potRemaining: ' + potRemaining);
 		if (potRemaining > 0) {
 			// Adding rounded value to first players
-			const mod = potRemaining % this.players.length;
-			for (const [index, player] of Object.entries(this.players)) {
-				const toAdd = Math.floor(potRemaining / this.players.length) + (index == 0 ? mod : 0);
+			const mod = potRemaining % winners.length;
+			for (const [index, player] of Object.entries(winners)) {
+				const toAdd = Math.floor(potRemaining / winners.length) + (index == 0 ? mod : 0);
 				player.money += toAdd;
 			}
 		} else if (potRemaining < 0) {
