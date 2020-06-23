@@ -206,7 +206,10 @@ const Game = function (name, host) {
 	}
 
 	this.playerIsChecked = (playr) => {
-		return this.roundData.bets && this.getCurrentRoundBets().some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
+		if (this.roundData.bets) {
+			const bets = this.getCurrentRoundBets() || [];
+			return bets.some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
+		}
 	}
 
 	this.findFirstToGoPlayer = () => {
