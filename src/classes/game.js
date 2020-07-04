@@ -1,7 +1,6 @@
 // server-side game logic for a texas hold 'em game
 const Deck = require('./deck.js');
 const Player = require('./player.js');
-const Card = require('./card.js');
 const Hand = require('pokersolver').Hand;
 
 const Game = function (name, host) {
@@ -14,12 +13,12 @@ const Game = function (name, host) {
 	this.gameWinner = null;
 	this.gameName = name;
 	this.roundNum = 0;
-	this.roundData = { 
+	this.roundData = {
 		dealer: 0,
-		bigBlind: '', 
-		smallBlind: '', 
-		turn: '', 
-		bets: [] 
+		bigBlind: '',
+		smallBlind: '',
+		turn: '',
+		bets: []
 	};
 	this.community = [];
 	this.foldPot = 0;
@@ -207,17 +206,17 @@ const Game = function (name, host) {
 
 	this.playerIsChecked = (playr) => {
 		if (this.roundData.bets) {
-			const bets = this.getCurrentRoundBets() || [];
+			const bets = this.getCurrentRoundBets() || [];
 			return bets.some(a => ((a.player == playr.getUsername()) && (a.bet == 0)));
 		}
 	}
 
 	this.findFirstToGoPlayer = () => {
-		if (this.players[this.roundData.smallBlind].getStatus() == 'Fold') {
+		if (this.players[this.roundData.smallBlind].getStatus() == 'Fold' || this.players[this.roundData.smallBlind].allIn) {
 			let index = this.roundData.smallBlind;
 			do {
 				index = (index - 1 < 0) ? (this.players.length - 1) : index - 1;
-			} while (this.players[index].getStatus() == 'Fold');
+			} while (this.players[index].getStatus() == 'Fold' || this.players[index].allIn);
 			return index;
 		} else {
 			return this.roundData.smallBlind;
@@ -387,6 +386,16 @@ const Game = function (name, host) {
 		return totalBetInStage;
 	}
 
+	this.getTotalInvested = (player) => {
+		return this.getPlayerBetInStageNum(player, 1) + this.getPlayerBetInStageNum(player, 2)
+			+ this.getPlayerBetInStageNum(player, 3) + this.getPlayerBetInStageNum(player, 4);
+	}
+
+	// this.distributeMoney = (winners) => {
+	// 	const playerInvestments = this.players.map(p => ({ 'player': p, 'invested': this.getTotalInvested(player) }));
+	// 	console.log(playerInvestments);
+	// }
+
 	this.distributeMoney = (winners) => {
 		const numWinners = winners.length;
 		const potTotal = this.getCurrentPot();
@@ -457,12 +466,7 @@ const Game = function (name, host) {
 						sidepot4.push({ bet: this.roundData.bets[3][i].bet, players: [this.roundData.bets[3][i].player] })
 					}
 				}
-				this.log('sidepot 1 ' + JSON.stringify(sidepot1));
-				this.log('sidepot 2 ' + JSON.stringify(sidepot2));
-				this.log('sidepot 3 ' + JSON.stringify(sidepot3));
-				this.log('sidepot 4 ' + JSON.stringify(sidepot4));
 				let winnings = 0;
-				//NOTE: does not handle more than two winners correctly yet
 				for (const pot of sidepot1) {
 					if (pot.players.includes(winner.getUsername())) {
 						if (winners.length == 1)
@@ -592,7 +596,7 @@ const Game = function (name, host) {
 				player.money += toAdd;
 			}
 		} else if (potRemaining < 0) {
-			this.log('yikes');	
+			this.log('yikes');
 		}
 	}
 
@@ -763,7 +767,6 @@ const Game = function (name, host) {
 		this.dealCards();
 		this.emitPlayers('startGame', { 'players': this.players.map(p => { return p.username; }) });
 		this.startNewRound();
-		this.printPretty();
 	};
 
 	this.dealCards = () => {
@@ -803,14 +806,6 @@ const Game = function (name, host) {
 		return { socket: { id: 0 } };
 	};
 
-	this.printPretty = () => {
-		this.log('----------------- GAME');
-		this.log('Status', this.status);
-		this.log('Players:');
-		this.players.map(p => p.printPretty());
-		this.log('----------------- GAME');
-	};
-
 	this.disconnectPlayer = (player) => {
 		this.disconnectedPlayers.push(player);
 		if (player.getStatus() == 'Their Turn') {
@@ -831,7 +826,7 @@ const Game = function (name, host) {
 	this.checkBigBlindWent = (socket) => {
 		if (this.findPlayer(socket.id).blindValue == 'Big Blind' && this.roundData.bets.length == 1) {
 			this.bigBlindWent = true;
-		} 
+		}
 	}
 
 	this.getCurrentRoundBets = () => {
