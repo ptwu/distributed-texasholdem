@@ -389,216 +389,248 @@ const Game = function (name, host) {
 	this.getTotalInvested = (player) => {
 		return this.getPlayerBetInStageNum(player, 1) + this.getPlayerBetInStageNum(player, 2)
 			+ this.getPlayerBetInStageNum(player, 3) + this.getPlayerBetInStageNum(player, 4);
+
+	}
+
+	this.distributeMoney = (winners) => {
+		let playerInvestments = this.players.map(p => ({ 'player': p, 'invested': this.getTotalInvested(p), 'result': -this.getTotalInvested(p) }));
+
+		let winnerPot = winners.reduce((acc, currPlayer) => acc + this.getTotalInvested(currPlayer), 0);
+
+		const endHandPlayerData = [];
+		while (playerInvestments.length > 1) {
+			const minStack = playerInvestments.reduce((acc, curr) => acc.invested < curr.invested ? acc.invested : curr.invested);
+			winnerPot += minStack * playerInvestments.length;
+			for (p of playerInvestments) {
+				p.invested -= minStack;
+			}
+			for (p of playerInvestments) {
+				if (winners.includes(p.player)) {
+					p.result += winnerPot / winners.length;
+				}
+			}
+			endHandPlayerData.push(...playerInvestments.filter(p => p.invested <= 0));
+			playerInvestments = playerInvestments.filter(p => p.invested > 0);
+
+			winnerPot = 0;
+		}
+		if (playerInvestments.length === 1) {
+			let p = playerInvestments[0];
+			p.result += p.invested;
+			endHandPlayerData.push(p);
+		}
+
+		for (p of endHandPlayerData) {
+			if (!winners.includes(p.player)) {
+				p.player.money += this.getTotalInvested(p.player);
+			}
+			p.player.money += p.result;
+		}
 	}
 
 	// this.distributeMoney = (winners) => {
-	// 	const playerInvestments = this.players.map(p => ({ 'player': p, 'invested': this.getTotalInvested(player) }));
-	// 	console.log(playerInvestments);
+	// 	const numWinners = winners.length;
+	// 	const potTotal = this.getCurrentPot();
+	// 	const potEligible = Math.floor(potTotal / numWinners);
+	// 	let potRemaining = potTotal;
+	// 	this.log('winners: ' + winners.map((w) => w.username).toString());
+	// 	for (const winner of winners) {
+	// 		if (winner.allIn || winner.getMoney() == 0) {
+	// 			// calculate what all-in player is eligible for (side pot calculation).
+	// 			// returns money to players
+	// 			let sidepot1 = [];
+	// 			let sidepot2 = [];
+	// 			let sidepot3 = [];
+	// 			let sidepot4 = [];
+	// 			for (let i = 0; i < 4; i++) {
+	// 				this.roundData.bets[i] = this.roundData.bets[i].filter(a => typeof a.bet === 'number');
+	// 				this.roundData.bets[i].sort((a, b) => a.bet - b.bet);
+	// 			}
+	// 			for (let i = 0; i < this.roundData.bets[0].length; i++) {
+	// 				if (sidepot1.some(a => this.roundData.bets[0][i].bet == a.bet)) {
+	// 					for (let j = 0; j < sidepot1.length; j++) {
+	// 						if (sidepot1[j].bet == this.roundData.bets[0][i].bet) {
+	// 							let pot = sidepot1[j];
+	// 							pot.players.push(this.roundData.bets[0][i].player);
+	// 							sidepot1[j] = pot;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					sidepot1.push({ bet: this.roundData.bets[0][i].bet, players: [this.roundData.bets[0][i].player] })
+	// 				}
+	// 			}
+	// 			for (let i = 0; i < this.roundData.bets[1].length; i++) {
+	// 				if (sidepot2.some(a => this.roundData.bets[1][i].bet == a.bet)) {
+	// 					for (let j = 0; j < sidepot2.length; j++) {
+	// 						if (sidepot2[j].bet == this.roundData.bets[1][i].bet) {
+	// 							let pot = sidepot2[j];
+	// 							pot.players.push(this.roundData.bets[1][i].player);
+	// 							sidepot2[j] = pot;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					sidepot2.push({ bet: this.roundData.bets[1][i].bet, players: [this.roundData.bets[1][i].player] })
+	// 				}
+	// 			}
+	// 			for (let i = 0; i < this.roundData.bets[2].length; i++) {
+	// 				if (sidepot3.some(a => this.roundData.bets[2][i].bet == a.bet)) {
+	// 					for (let j = 0; j < sidepot3.length; j++) {
+	// 						if (sidepot3[j].bet == this.roundData.bets[2][i].bet) {
+	// 							let pot = sidepot3[j];
+	// 							pot.players.push(this.roundData.bets[2][i].player);
+	// 							sidepot3[j] = pot;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					sidepot3.push({ bet: this.roundData.bets[2][i].bet, players: [this.roundData.bets[2][i].player] })
+	// 				}
+	// 			}
+	// 			for (let i = 0; i < this.roundData.bets[3].length; i++) {
+	// 				if (sidepot4.some(a => this.roundData.bets[3][i].bet == a.bet)) {
+	// 					for (let j = 0; j < sidepot4.length; j++) {
+	// 						if (sidepot4[j].bet == this.roundData.bets[3][i].bet) {
+	// 							let pot = sidepot4[j];
+	// 							pot.players.push(this.roundData.bets[3][i].player);
+	// 							sidepot4[j] = pot;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					sidepot4.push({ bet: this.roundData.bets[3][i].bet, players: [this.roundData.bets[3][i].player] })
+	// 				}
+	// 			}
+	// 			let winnings = 0;
+	// 			for (const pot of sidepot1) {
+	// 				if (pot.players.includes(winner.getUsername())) {
+	// 					if (winners.length == 1)
+	// 						winnings += pot.bet * pot.players.length;
+	// 					else {
+	// 						if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 							winnings += (pot.bet * pot.players.length) / winners.length;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					for (const player of pot.players) {
+	// 						//return money
+	// 						let playerObj = this.players.find(a => a.getUsername() == player);
+	// 						if (playerObj == undefined) { this.log('yikes'); break; }
+	// 						if (winners.length == 1) {
+	// 							const toAdd = Math.floor(pot.bet / pot.players.length);
+	// 							playerObj.money = playerObj.money + toAdd;
+	// 							potRemaining -= toAdd;
+	// 						} else {
+	// 							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 								const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
+	// 								playerObj.money = playerObj.money + toAdd;
+	// 								potRemaining -= toAdd;
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 			for (const pot of sidepot2) {
+	// 				if (pot.players.includes(winner.getUsername())) {
+	// 					if (winners.length == 1)
+	// 						winnings += pot.bet * pot.players.length;
+	// 					else {
+	// 						if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 							winnings += (pot.bet * pot.players.length) / winners.length;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					for (const player of pot.players) {
+	// 						//return money
+	// 						let playerObj = this.players.find(a => a.getUsername() == player);
+	// 						if (playerObj == undefined) { this.log('yikes'); break; }
+	// 						if (winners.length == 1) {
+	// 							const toAdd = Math.floor(pot.bet / pot.players.length);
+	// 							playerObj.money = playerObj.money + toAdd;
+	// 							potRemaining -= toAdd;
+	// 						} else {
+	// 							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 								const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
+	// 								playerObj.money = playerObj.money + toAdd;
+	// 								potRemaining -= toAdd;
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 			for (const pot of sidepot3) {
+	// 				if (pot.players.includes(winner.getUsername())) {
+	// 					if (winners.length == 1)
+	// 						winnings += pot.bet * pot.players.length;
+	// 					else {
+	// 						if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 							winnings += (pot.bet * pot.players.length) / winners.length;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					for (const player of pot.players) {
+	// 						//return money
+	// 						let playerObj = this.players.find(a => a.getUsername() == player);
+	// 						if (playerObj == undefined) { this.log('yikes'); break; }
+	// 						if (winners.length == 1) {
+	// 							const toAdd = Math.floor(pot.bet / pot.players.length);
+	// 							playerObj.money = playerObj.money + toAdd;
+	// 							potRemaining -= toAdd;
+	// 						} else {
+	// 							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 								const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
+	// 								playerObj.money = playerObj.money + toAdd;
+	// 								potRemaining -= toAdd;
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 			for (const pot of sidepot4) {
+	// 				if (pot.players.includes(winner.getUsername())) {
+	// 					if (winners.length == 1)
+	// 						winnings += pot.bet * pot.players.length;
+	// 					else {
+	// 						if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 							winnings += (pot.bet * pot.players.length) / winners.length;
+	// 						}
+	// 					}
+	// 				} else {
+	// 					for (const player of pot.players) {
+	// 						//return money
+	// 						let playerObj = this.players.find(a => a.getUsername() == player);
+	// 						if (playerObj == undefined) { this.log('yikes'); break; }
+	// 						if (winners.length == 1) {
+	// 							const toAdd = Math.floor(pot.bet / pot.players.length);
+	// 							playerObj.money = playerObj.money + toAdd;
+	// 							potRemaining -= toAdd;
+	// 						} else {
+	// 							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
+	// 								const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
+	// 								playerObj.money = playerObj.money + toAdd;
+	// 								potRemaining -= toAdd;
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 			winner.money = winner.money + winnings;
+	// 			potRemaining -= winnings;
+	// 		} else {
+	// 			winner.money = winner.money + potEligible;
+	// 			potRemaining -= potEligible;
+	// 		}
+	// 	}
+
+	// 	this.log('potRemaining: ' + potRemaining);
+	// 	if (potRemaining > 0) {
+	// 		// Adding rounded value to first players
+	// 		const mod = potRemaining % winners.length;
+	// 		for (const [index, player] of Object.entries(winners)) {
+	// 			const toAdd = Math.floor(potRemaining / winners.length) + (index == 0 ? mod : 0);
+	// 			player.money += toAdd;
+	// 		}
+	// 	} else if (potRemaining < 0) {
+	// 		this.log('yikes');
+	// 	}
 	// }
-
-	this.distributeMoney = (winners) => {
-		const numWinners = winners.length;
-		const potTotal = this.getCurrentPot();
-		const potEligible = Math.floor(potTotal / numWinners);
-		let potRemaining = potTotal;
-		this.log('winners: ' + winners.map((w) => w.username).toString());
-		for (const winner of winners) {
-			if (winner.allIn || winner.getMoney() == 0) {
-				// calculate what all-in player is eligible for (side pot calculation).
-				// returns money to players
-				let sidepot1 = [];
-				let sidepot2 = [];
-				let sidepot3 = [];
-				let sidepot4 = [];
-				for (let i = 0; i < 4; i++) {
-					this.roundData.bets[i] = this.roundData.bets[i].filter(a => typeof a.bet === 'number');
-					this.roundData.bets[i].sort((a, b) => a.bet - b.bet);
-				}
-				for (let i = 0; i < this.roundData.bets[0].length; i++) {
-					if (sidepot1.some(a => this.roundData.bets[0][i].bet == a.bet)) {
-						for (let j = 0; j < sidepot1.length; j++) {
-							if (sidepot1[j].bet == this.roundData.bets[0][i].bet) {
-								let pot = sidepot1[j];
-								pot.players.push(this.roundData.bets[0][i].player);
-								sidepot1[j] = pot;
-							}
-						}
-					} else {
-						sidepot1.push({ bet: this.roundData.bets[0][i].bet, players: [this.roundData.bets[0][i].player] })
-					}
-				}
-				for (let i = 0; i < this.roundData.bets[1].length; i++) {
-					if (sidepot2.some(a => this.roundData.bets[1][i].bet == a.bet)) {
-						for (let j = 0; j < sidepot2.length; j++) {
-							if (sidepot2[j].bet == this.roundData.bets[1][i].bet) {
-								let pot = sidepot2[j];
-								pot.players.push(this.roundData.bets[1][i].player);
-								sidepot2[j] = pot;
-							}
-						}
-					} else {
-						sidepot2.push({ bet: this.roundData.bets[1][i].bet, players: [this.roundData.bets[1][i].player] })
-					}
-				}
-				for (let i = 0; i < this.roundData.bets[2].length; i++) {
-					if (sidepot3.some(a => this.roundData.bets[2][i].bet == a.bet)) {
-						for (let j = 0; j < sidepot3.length; j++) {
-							if (sidepot3[j].bet == this.roundData.bets[2][i].bet) {
-								let pot = sidepot3[j];
-								pot.players.push(this.roundData.bets[2][i].player);
-								sidepot3[j] = pot;
-							}
-						}
-					} else {
-						sidepot3.push({ bet: this.roundData.bets[2][i].bet, players: [this.roundData.bets[2][i].player] })
-					}
-				}
-				for (let i = 0; i < this.roundData.bets[3].length; i++) {
-					if (sidepot4.some(a => this.roundData.bets[3][i].bet == a.bet)) {
-						for (let j = 0; j < sidepot4.length; j++) {
-							if (sidepot4[j].bet == this.roundData.bets[3][i].bet) {
-								let pot = sidepot4[j];
-								pot.players.push(this.roundData.bets[3][i].player);
-								sidepot4[j] = pot;
-							}
-						}
-					} else {
-						sidepot4.push({ bet: this.roundData.bets[3][i].bet, players: [this.roundData.bets[3][i].player] })
-					}
-				}
-				let winnings = 0;
-				for (const pot of sidepot1) {
-					if (pot.players.includes(winner.getUsername())) {
-						if (winners.length == 1)
-							winnings += pot.bet * pot.players.length;
-						else {
-							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-								winnings += (pot.bet * pot.players.length) / winners.length;
-							}
-						}
-					} else {
-						for (const player of pot.players) {
-							//return money
-							let playerObj = this.players.find(a => a.getUsername() == player);
-							if (playerObj == undefined) { this.log('yikes'); break; }
-							if (winners.length == 1) {
-								const toAdd = Math.floor(pot.bet / pot.players.length);
-								playerObj.money = playerObj.money + toAdd;
-								potRemaining -= toAdd;
-							} else {
-								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-									const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
-									playerObj.money = playerObj.money + toAdd;
-									potRemaining -= toAdd;
-								}
-							}
-						}
-					}
-				}
-				for (const pot of sidepot2) {
-					if (pot.players.includes(winner.getUsername())) {
-						if (winners.length == 1)
-							winnings += pot.bet * pot.players.length;
-						else {
-							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-								winnings += (pot.bet * pot.players.length) / winners.length;
-							}
-						}
-					} else {
-						for (const player of pot.players) {
-							//return money
-							let playerObj = this.players.find(a => a.getUsername() == player);
-							if (playerObj == undefined) { this.log('yikes'); break; }
-							if (winners.length == 1) {
-								const toAdd = Math.floor(pot.bet / pot.players.length);
-								playerObj.money = playerObj.money + toAdd;
-								potRemaining -= toAdd;
-							} else {
-								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-									const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
-									playerObj.money = playerObj.money + toAdd;
-									potRemaining -= toAdd;
-								}
-							}
-						}
-					}
-				}
-				for (const pot of sidepot3) {
-					if (pot.players.includes(winner.getUsername())) {
-						if (winners.length == 1)
-							winnings += pot.bet * pot.players.length;
-						else {
-							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-								winnings += (pot.bet * pot.players.length) / winners.length;
-							}
-						}
-					} else {
-						for (const player of pot.players) {
-							//return money
-							let playerObj = this.players.find(a => a.getUsername() == player);
-							if (playerObj == undefined) { this.log('yikes'); break; }
-							if (winners.length == 1) {
-								const toAdd = Math.floor(pot.bet / pot.players.length);
-								playerObj.money = playerObj.money + toAdd;
-								potRemaining -= toAdd;
-							} else {
-								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-									const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
-									playerObj.money = playerObj.money + toAdd;
-									potRemaining -= toAdd;
-								}
-							}
-						}
-					}
-				}
-				for (const pot of sidepot4) {
-					if (pot.players.includes(winner.getUsername())) {
-						if (winners.length == 1)
-							winnings += pot.bet * pot.players.length;
-						else {
-							if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-								winnings += (pot.bet * pot.players.length) / winners.length;
-							}
-						}
-					} else {
-						for (const player of pot.players) {
-							//return money
-							let playerObj = this.players.find(a => a.getUsername() == player);
-							if (playerObj == undefined) { this.log('yikes'); break; }
-							if (winners.length == 1) {
-								const toAdd = Math.floor(pot.bet / pot.players.length);
-								playerObj.money = playerObj.money + toAdd;
-								potRemaining -= toAdd;
-							} else {
-								if (pot.players.includes(winners[1].getUsername()) || (winners.length == 3 && pot.players.includes(winners[2].getUsername()))) {
-									const toAdd = Math.floor((pot.bet / pot.players.length) / winners.length);
-									playerObj.money = playerObj.money + toAdd;
-									potRemaining -= toAdd;
-								}
-							}
-						}
-					}
-				}
-				winner.money = winner.money + winnings;
-				potRemaining -= winnings;
-			} else {
-				winner.money = winner.money + potEligible;
-				potRemaining -= potEligible;
-			}
-		}
-
-		this.log('potRemaining: ' + potRemaining);
-		if (potRemaining > 0) {
-			// Adding rounded value to first players
-			const mod = potRemaining % winners.length;
-			for (const [index, player] of Object.entries(winners)) {
-				const toAdd = Math.floor(potRemaining / winners.length) + (index == 0 ? mod : 0);
-				player.money += toAdd;
-			}
-		} else if (potRemaining < 0) {
-			this.log('yikes');
-		}
-	}
 
 	this.evaluateWinners = () => {
 		let handArray = [];
