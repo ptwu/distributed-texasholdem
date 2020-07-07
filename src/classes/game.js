@@ -399,7 +399,7 @@ const Game = function (name, host) {
 			}
 			const sortedByHandStrength = playerInvestments.sort((a, b) => a.handStrength > b.handStrength ? -1 : 1);
 			const maxHand = sortedByHandStrength[0].handStrength;
-			const winners = playerInvestments.filter((p) => p.handStrength === maxHand);
+			const winners = playerInvestments.filter((p) => p.handStrength === maxHand && p.live);
 			for (p of winners) {
 				p.result += winnerPot / winners.length;
 			}
@@ -409,7 +409,7 @@ const Game = function (name, host) {
 
 		if (playerInvestments.length === 1) {
 			let p = playerInvestments[0];
-			p.result += p.invested;
+			p.result += winnerPot + p.invested;
 		}
 	}
 
@@ -422,10 +422,11 @@ const Game = function (name, host) {
 				invested: invested, 
 				originalInvested: invested,
 				handStrength: winData ? winData.rank : -1,
-				result: -invested
+				result: -invested,
+				live: p.getStatus() !== 'Fold'
 			}
 		});
-		let pot = 0;
+		let pot = this.foldPot;
 		this.calculateMoney(pot, playerInvestments);
 
 		for (p of playerInvestments) {
