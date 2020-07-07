@@ -420,16 +420,16 @@ const Game = function (name, host) {
 			return { 
 				player: p, 
 				invested: invested, 
-				handStrength: winData ? winData.rank : 0,
+				originalInvested: invested,
+				handStrength: winData ? winData.rank : -1,
 				result: -invested
 			}
 		});
-		let winnerPot = result.winnerData.reduce((acc, currPlayer) => acc + this.getTotalInvested(currPlayer.player), 0);
-
-		this.calculateMoney(winnerPot, playerInvestments);
+		let pot = 0;
+		this.calculateMoney(pot, playerInvestments);
 
 		for (p of playerInvestments) {
-			p.player.money += p.result;
+			p.player.money += p.originalInvested + p.result;
 		}
 	}
 
