@@ -535,7 +535,7 @@ const Game = function (name, host) {
 		this.roundInProgress = false;
 		let cardData = [];
 		for (let i = 0; i < this.players.length; i++) {
-			const winData = winners.find(w => w.player.username === this.players[i].getUsername());
+			const winData = winners.find(w => w.player === this.players[i]);
 			cardData.push({
 				username: this.players[i].getUsername(),
 				cards: this.players[i].cards,
