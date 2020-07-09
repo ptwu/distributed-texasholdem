@@ -302,7 +302,7 @@ const Game = function (name, host) {
 						playerResult.player.setStatus(playerResult.hand.name);
 					}
 					const winningData = this.distributeMoney(roundResults);
-					this.revealCards(winningData.filter(a => a.winner).map(a => a.player.getUsername()));
+					this.revealCards(winningData.filter(a => a.winner));
 
 				} else {
 					this.log('This stage of the round is INVALID!!');
@@ -530,28 +530,30 @@ const Game = function (name, host) {
 		}
 	}
 
-	this.revealCards = (winnersUsernames) => {
+	this.revealCards = (winners) => {
 		this.log('revealllllll');
 		this.roundInProgress = false;
 		let cardData = [];
 		for (let i = 0; i < this.players.length; i++) {
+			const winData = winners.find(w => w.player.username === this.players[i].getUsername());
 			cardData.push({
-				'username': this.players[i].getUsername(),
-				'cards': this.players[i].cards,
-				'hand': this.players[i].getStatus(),
-				'folded': this.players[i].getStatus() == 'Fold',
-				'money': this.players[i].getMoney(),
-				'buyIns': this.players[i].buyIns
+				username: this.players[i].getUsername(),
+				cards: this.players[i].cards,
+				hand: this.players[i].getStatus(),
+				folded: this.players[i].getStatus() == 'Fold',
+				money: this.players[i].getMoney(),
+				buyIns: this.players[i].buyIns,
+				gain: winData ? winData.gain : null
 			});
 		}
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit('reveal', {
-				'username': this.players[pn].getUsername(),
-				'money': this.players[pn].getMoney(),
-				'cards': cardData,
-				'bets': this.roundData.bets,
-				'winners': winnersUsernames.toString(),
-				'hand': this.players[pn].getStatus()
+				username: this.players[pn].getUsername(),
+				money: this.players[pn].getMoney(),
+				cards: cardData,
+				bets: this.roundData.bets,
+				winners: winnersUsernames.map(a => a.player.getUsername()).toString(),
+				hand: this.players[pn].getStatus()
 			});
 		}
 	}
