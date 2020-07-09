@@ -546,13 +546,14 @@ const Game = function (name, host) {
 				gain: winData ? winData.gain : null
 			});
 		}
+		const winnersUsernames = winners.map(a => a.player.getUsername()).toString()
 		for (let pn = 0; pn < this.getNumPlayers(); pn++) {
 			this.players[pn].emit('reveal', {
 				username: this.players[pn].getUsername(),
 				money: this.players[pn].getMoney(),
 				cards: cardData,
 				bets: this.roundData.bets,
-				winners: winnersUsernames.map(a => a.player.getUsername()).toString(),
+				winners: winnersUsernames,
 				hand: this.players[pn].getStatus()
 			});
 		}
