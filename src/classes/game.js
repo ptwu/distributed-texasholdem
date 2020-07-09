@@ -301,8 +301,8 @@ const Game = function (name, host) {
 					for (playerResult of roundResults.playersData) {
 						playerResult.player.setStatus(playerResult.hand.name);
 					}
-					this.distributeMoney(roundResults);
-					this.revealCards(roundResults.playersData.map(a => a.player.getUsername()));
+					const winningData = this.distributeMoney(roundResults);
+					this.revealCards(winningData.filter(a => a.winner).map(a => a.player.getUsername()));
 
 				} else {
 					this.log('This stage of the round is INVALID!!');
@@ -423,15 +423,22 @@ const Game = function (name, host) {
 				originalInvested: invested,
 				handStrength: winData ? winData.rank : -1,
 				result: -invested,
-				live: p.getStatus() !== 'Fold'
+				live: p.getStatus() !== 'Fold',
+				winner: false,
+				gain: 0
 			}
 		});
 		let pot = this.foldPot;
 		this.calculateMoney(pot, playerInvestments);
 
 		for (p of playerInvestments) {
-			p.player.money += p.originalInvested + p.result;
+			p.gain = p.originalInvested + p.result;
+			p.player.money += p.gain;
+			if (p.gain > 0) {
+				p.winner = true;
+			}
 		}
+		return playerInvestments;
 	}
 
 	this.evaluateWinners = () => {
