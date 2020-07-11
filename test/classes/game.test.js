@@ -21,7 +21,7 @@ test('Test call until fold then check', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   expect(game.players.length).toBe(2);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -86,7 +86,7 @@ test('Test raise more than possessed', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   expect(game.players.length).toBe(2);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -131,7 +131,7 @@ test('Test bet more than possessed', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   expect(game.players.length).toBe(2);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -183,7 +183,7 @@ test('Test all-in / call', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   expect(game.players.length).toBe(2);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -240,7 +240,7 @@ test('Test all-in 3 players', () => {
   expect(game.findPlayer(3)).toBe(p3);
 
   expect(game.players.length).toBe(3);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -252,7 +252,7 @@ test('Test all-in 3 players', () => {
   const thirdPlayer = game.players.filter((p) => [smallPlayer, bigPlayer].indexOf(p) === -1)[0];
 
   let currentPlayer;
-  
+
   // Pre-Flop
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
   expect(game.call(currentPlayer.socket)).toBe(true);
@@ -302,7 +302,7 @@ test('Test disconnected', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   expect(game.players.length).toBe(2);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -353,7 +353,7 @@ test('Test init blind and dealer', () => {
   expect(game.findPlayer(3)).toBe(p3);
 
   expect(game.players.length).toBe(3);
-  
+
   expect(game.roundNum).toBe(0);
   game.startGame();
   expect(game.roundNum).toBe(1);
@@ -416,7 +416,7 @@ test('Test raise', () => {
   expect(game.findPlayer(2)).toBe(p2);
 
   expect(game.players.length).toBe(2);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -424,7 +424,7 @@ test('Test raise', () => {
   expect(game.roundData.bets.length).toBeGreaterThan(0);
 
   let currentPlayer;
-  
+
   // Pre-Flop
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
   expect(game.bet(currentPlayer.socket, 30)).toBe(true);
@@ -469,7 +469,7 @@ test('Test all-in 3 players low credits win', () => {
   expect(game.findPlayer(3)).toBe(p3);
 
   expect(game.players.length).toBe(3);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -495,7 +495,7 @@ test('Test all-in 3 players low credits win', () => {
   expect(game.roundData.bets.length).toBeGreaterThan(0);
 
   let currentPlayer;
-  
+
   // Pre-Flop
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
   expect(game.call(currentPlayer.socket)).toBe(true);
@@ -571,7 +571,7 @@ test('Test all-in 3 players high credits win', () => {
   expect(game.findPlayer(3)).toBe(p3);
 
   expect(game.players.length).toBe(3);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -597,7 +597,7 @@ test('Test all-in 3 players high credits win', () => {
   expect(game.roundData.bets.length).toBeGreaterThan(0);
 
   let currentPlayer;
-  
+
   // Pre-Flop
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
   expect(game.call(currentPlayer.socket)).toBe(true);
@@ -645,6 +645,12 @@ test('Test all-in 3 players high credits win', () => {
   expect(game.roundData.bets.length).toBe(4);
 });
 
+function getCurrentPlayer(players) {
+  const currentTurnArr = players.filter((p) => p.status === 'Their Turn');
+  expect(currentTurnArr.length).toBe(1);
+  return currentTurnArr[0];
+}
+
 test('Test fold', () => {
   const game = new Game('best-game', '1');
   game.smallBlind = 5;
@@ -672,7 +678,7 @@ test('Test fold', () => {
   expect(game.findPlayer(3)).toBe(p3);
 
   expect(game.players.length).toBe(3);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -681,40 +687,48 @@ test('Test fold', () => {
   expect(game.roundData.bets.length).toBeGreaterThan(0);
 
   let currentPlayer;
-  
+
   // Pre-Flop
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   expect(game.raise(currentPlayer.socket, 30)).toBe(true);
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   expect(game.call(currentPlayer.socket)).toBe(true);
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   expect(game.fold(currentPlayer.socket)).toBe(true);
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(2);
 
+  console.log(game.players);
+
   // Flop
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(2);
 
+  console.log(game.players);
+
   // Turn
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(3);
 
+  console.log(game.players);
+
   // River
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
-  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(4);
+  expect(game.roundInProgress).toBe(false);
+  console.log(game.players);
 
   expect(game.players.reduce((a, c) => a + c.money, 0)).toBe(300);
 });
@@ -746,7 +760,7 @@ test('Test all fold', () => {
   expect(game.findPlayer(3)).toBe(p3);
 
   expect(game.players.length).toBe(3);
-  
+
   expect(game.roundNum).toBe(0);
   expect(game.roundData.bets.length).toBe(0);
   game.startGame();
@@ -755,7 +769,7 @@ test('Test all fold', () => {
   expect(game.roundData.bets.length).toBeGreaterThan(0);
 
   let currentPlayer;
-  
+
   // Pre-Flop
   currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
   expect(game.raise(currentPlayer.socket, 30)).toBe(true);
@@ -784,11 +798,11 @@ test('Test _distributeMoney', () => {
   const game = new Game('best-game', '1');
   const pot = 100;
   const players = [
-    {live: true, invested: 20, handStrength: 100, result: 0},
-    {live: true, invested: 50, handStrength: 200, result: 0},
-    {live: true, invested: 80, handStrength: 90, result: 0},
-    {live: true, invested: 80, handStrength: 100, result: 0},
-    {live: true, invested: 1000, handStrength: 0, result: 0},
+    { live: true, invested: 20, handStrength: 100, result: 0 },
+    { live: true, invested: 50, handStrength: 200, result: 0 },
+    { live: true, invested: 80, handStrength: 90, result: 0 },
+    { live: true, invested: 80, handStrength: 100, result: 0 },
+    { live: true, invested: 1000, handStrength: 0, result: 0 },
   ];
 
   game.calculateMoney(pot, players);

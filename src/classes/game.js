@@ -417,9 +417,9 @@ const Game = function (name, host) {
 		let playerInvestments = this.players.map(p => {
 			const winData = result.winnerData.find((w) => w.player === p);
 			const invested = this.getTotalInvested(p);
-			return { 
-				player: p, 
-				invested: invested, 
+			return {
+				player: p,
+				invested: invested,
 				originalInvested: invested,
 				handStrength: winData ? winData.rank : -1,
 				result: -invested,
@@ -459,10 +459,10 @@ const Game = function (name, host) {
 				for (playerHand of playerArray) {
 					let winnerArray = winner.toString().split(', ');
 					if (this.arraysEqual(playerHand.hand.cards.sort(), winnerArray.sort())) {
-						winnerData.push({ 
-							player: playerHand.player, 
-							rank: playerHand.hand.rank, 
-							handTitle: playerHand.hand.name 
+						winnerData.push({
+							player: playerHand.player,
+							rank: playerHand.hand.rank,
+							handTitle: playerHand.hand.name
 						});
 						break;
 					}
