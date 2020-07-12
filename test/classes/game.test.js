@@ -694,23 +694,13 @@ test('Test fold', () => {
   currentPlayer = getCurrentPlayer(game.players);
   expect(game.call(currentPlayer.socket)).toBe(true);
   currentPlayer = getCurrentPlayer(game.players);
-  expect(game.fold(currentPlayer.socket)).toBe(true);
+  expect(game.call(currentPlayer.socket)).toBe(true);
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(2);
-
-  console.log(game.players);
 
   // Flop
   currentPlayer = getCurrentPlayer(game.players);
-  game.check(currentPlayer.socket);
-  currentPlayer = getCurrentPlayer(game.players);
-  game.check(currentPlayer.socket);
-  expect(game.roundNum).toBe(1);
-  expect(game.roundData.bets.length).toBe(2);
-
-  console.log(game.players);
-
-  // Turn
+  game.fold(currentPlayer.socket);
   currentPlayer = getCurrentPlayer(game.players);
   game.check(currentPlayer.socket);
   currentPlayer = getCurrentPlayer(game.players);
@@ -718,7 +708,13 @@ test('Test fold', () => {
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(3);
 
-  console.log(game.players);
+  // Turn
+  currentPlayer = getCurrentPlayer(game.players);
+  game.check(currentPlayer.socket);
+  currentPlayer = getCurrentPlayer(game.players);
+  game.check(currentPlayer.socket);
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBe(4);
 
   // River
   currentPlayer = getCurrentPlayer(game.players);
@@ -728,7 +724,6 @@ test('Test fold', () => {
   expect(game.roundNum).toBe(1);
   expect(game.roundData.bets.length).toBe(4);
   expect(game.roundInProgress).toBe(false);
-  console.log(game.players);
 
   expect(game.players.reduce((a, c) => a + c.money, 0)).toBe(300);
 });
