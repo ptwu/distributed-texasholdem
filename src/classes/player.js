@@ -12,8 +12,6 @@ const Player = function (playerName, socket, debug) {
 	this.goAgainStatus = false;
 	this.debug = debug || false;
 
-	const constructor = function () { }(this);
-
 	this.addCard = (card) => {
 		this.cards.push(card);
 	};
@@ -37,20 +35,6 @@ const Player = function (playerName, socket, debug) {
 	this.emit = (eventName, payload) => {
 		this.socket.emit(eventName, payload);
 	};
-
-	this.printPretty = () => {
-		let cardsMsg = 'Cards: ';
-		for (i = 0; i < this.cards.length; i++) {
-			cardsMsg += this.cards[i].getValue() + " " + this.cards[i].getSuit() + ', ';
-		}
-
-		this.log('----------------- PLAYER');
-		this.log('Username:', this.username);
-		this.log(cardsMsg);
-		this.log('SocketID: ', this.socket.id);
-		this.log('----------------- PLAYER');
-	};
-
 };
 
 module.exports = Player;
