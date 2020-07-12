@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
 			let code;
 			do {
 				code = "" + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10);
-			} while (rooms.length != 0 && (rooms.some(r => r.getCode == code)));
+			} while (rooms.length != 0 && (rooms.some(r => r.getCode() === code)));
 			const game = new Game(code, data.username);
 			rooms.push(game);
 			game.addPlayer(data.username, socket);
