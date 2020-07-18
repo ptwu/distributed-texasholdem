@@ -27,3 +27,5 @@ yarn-error.log*
 # Misc
 .DS_Store
 /*.env
+
+.prettierrc

@@ -23,7 +23,7 @@ const Card = function (value, suit) {
     return this.suit;
   };
 
-  this.print = () => console.log(this.getValue() + " of " + this.getSuit());
+  this.print = () => console.log(this.getValue() + ' of ' + this.getSuit());
 };
 
 module.exports = Card;

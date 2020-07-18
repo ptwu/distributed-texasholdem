@@ -1,7 +1,7 @@
 // server-side game logic for a texas hold 'em game
-const Deck = require("./deck.js");
-const Player = require("./player.js");
-const Hand = require("pokersolver").Hand;
+const Deck = require('./deck.js');
+const Player = require('./player.js');
+const Hand = require('pokersolver').Hand;
 
 const Game = function (name, host) {
   this.deck = new Deck();
@@ -15,15 +15,15 @@ const Game = function (name, host) {
   this.roundNum = 0;
   this.roundData = {
     dealer: 0,
-    bigBlind: "",
-    smallBlind: "",
-    turn: "",
+    bigBlind: '',
+    smallBlind: '',
+    turn: '',
     bets: [],
   };
   this.community = [];
   this.foldPot = 0;
   this.bigBlindWent = false;
-  this.lastMoveParsed = { move: "", player: "" };
+  this.lastMoveParsed = { move: '', player: '' };
   this.roundInProgress = false;
   this.disconnectedPlayers = [];
   this.autoBuyIns = true;
@@ -49,19 +49,19 @@ const Game = function (name, host) {
         ? this.roundData.smallBlind + 1
         : 0;
 
-    this.log("smallBlind: " + this.roundData.smallBlind);
-    this.log("bigBlind: " + this.roundData.bigBlind);
+    this.log('smallBlind: ' + this.roundData.smallBlind);
+    this.log('bigBlind: ' + this.roundData.bigBlind);
 
     for (let i = 0; i < this.players.length; i++) {
       this.players[i].setDealer(i === this.roundData.dealer);
       if (i === this.roundData.bigBlind) {
-        this.players[i].setBlind("Big Blind");
+        this.players[i].setBlind('Big Blind');
       } else if (i === this.roundData.smallBlind) {
-        this.players[i].setBlind("Small Blind");
+        this.players[i].setBlind('Small Blind');
       } else {
-        this.players[i].setBlind("");
+        this.players[i].setBlind('');
       }
-      this.players[i].setStatus("");
+      this.players[i].setStatus('');
     }
 
     const goFirstIndex =
@@ -69,19 +69,19 @@ const Game = function (name, host) {
         ? this.players.length - 1
         : this.roundData.bigBlind - 1;
     this.roundData.turn = this.players[goFirstIndex].getUsername();
-    this.players[goFirstIndex].setStatus("Their Turn");
+    this.players[goFirstIndex].setStatus('Their Turn');
   };
 
   this.startNewRound = () => {
-    this.lastMoveParsed = { move: "", player: "" };
+    this.lastMoveParsed = { move: '', player: '' };
     this.roundInProgress = true;
     this.foldPot = 0;
     this.bigBlindWent = false;
     this.community = [];
-    this.roundData.turn = "";
+    this.roundData.turn = '';
     this.roundData.bets = [];
     this.dealCards();
-    this.log("deck len" + this.deck.cards.length);
+    this.log('deck len' + this.deck.cards.length);
     for (pn of this.players) {
       pn.allIn = false;
     }
@@ -162,7 +162,7 @@ const Game = function (name, host) {
       });
     }
     for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-      this.players[pn].emit("rerender", {
+      this.players[pn].emit('rerender', {
         community: this.community,
         topBet: this.getCurrentTopBet(),
         bets: this.roundData.bets,
@@ -189,7 +189,7 @@ const Game = function (name, host) {
       for (let i = 0; i < this.roundData.bets.length; i++) {
         sum += this.roundData.bets[i].reduce(
           (acc, curr) =>
-            curr.bet != "Buy-in" && curr.bet != "Fold"
+            curr.bet != 'Buy-in' && curr.bet != 'Fold'
               ? acc + curr.bet
               : acc + 0,
           0
@@ -212,8 +212,8 @@ const Game = function (name, host) {
     for (let j = 0; j < stageData.length; j++) {
       if (
         stageData[j].player == player.getUsername() &&
-        stageData[j].bet != "Buy-in" &&
-        stageData[j].bet != "Fold"
+        stageData[j].bet != 'Buy-in' &&
+        stageData[j].bet != 'Fold'
       ) {
         totalBetInStage += stageData[j].bet;
         break;
@@ -236,15 +236,15 @@ const Game = function (name, host) {
 
   this.getStageName = () => {
     if (this.roundData.bets.length == 1) {
-      return "Pre-Flop";
+      return 'Pre-Flop';
     } else if (this.roundData.bets.length == 2) {
-      return "Flop";
+      return 'Flop';
     } else if (this.roundData.bets.length == 3) {
-      return "Turn";
+      return 'Turn';
     } else if (this.roundData.bets.length == 4) {
-      return "River";
+      return 'River';
     } else {
-      return "Error";
+      return 'Error';
     }
   };
 
@@ -257,14 +257,14 @@ const Game = function (name, host) {
 
   this.findFirstToGoPlayer = () => {
     if (
-      this.players[this.roundData.smallBlind].getStatus() == "Fold" ||
+      this.players[this.roundData.smallBlind].getStatus() == 'Fold' ||
       this.players[this.roundData.smallBlind].allIn
     ) {
       let index = this.roundData.smallBlind;
       do {
         index = index - 1 < 0 ? this.players.length - 1 : index - 1;
       } while (
-        this.players[index].getStatus() == "Fold" ||
+        this.players[index].getStatus() == 'Fold' ||
         this.players[index].allIn
       );
       return index;
@@ -277,7 +277,7 @@ const Game = function (name, host) {
     let numNonFolds = 0;
     let nonFolderPlayer;
     for (let i = 0; i < this.getNumPlayers(); i++) {
-      if (this.players[i].getStatus() != "Fold") {
+      if (this.players[i].getStatus() != 'Fold') {
         numNonFolds++;
         nonFolderPlayer = this.players[i];
       }
@@ -289,11 +289,11 @@ const Game = function (name, host) {
     for (let i = 0; i < this.players.length; i++) {
       if (
         i === this.findFirstToGoPlayer() &&
-        this.players[i].getStatus() !== "Fold"
+        this.players[i].getStatus() !== 'Fold'
       ) {
-        this.players[i].setStatus("Their Turn");
-      } else if (this.players[i].getStatus() !== "Fold") {
-        this.players[i].setStatus("");
+        this.players[i].setStatus('Their Turn');
+      } else if (this.players[i].getStatus() !== 'Fold') {
+        this.players[i].setStatus('');
       }
     }
     this.roundData.bets.push([]);
@@ -302,9 +302,9 @@ const Game = function (name, host) {
   this.moveOntoNextPlayer = () => {
     let handOver = false;
     if (this.isStageComplete()) {
-      this.log("stage complete");
+      this.log('stage complete');
       if (this.allPlayersAllIn()) {
-        this.log(" all players all in");
+        this.log(' all players all in');
         if (this.roundData.bets.length == 1) {
           this.community.push(this.deck.dealRandomCard());
           this.community.push(this.deck.dealRandomCard());
@@ -326,7 +326,7 @@ const Game = function (name, host) {
       const [numNonFolds, nonFolderPlayer] = this.getNonFoldedPlayer();
       if (numNonFolds == 1) {
         // everyone folded, start new round, give pot to player
-        this.log("everyone folded except one");
+        this.log('everyone folded except one');
         nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
         this.endHandAllFold(nonFolderPlayer.getUsername());
         handOver = true;
@@ -351,45 +351,45 @@ const Game = function (name, host) {
           const winningData = this.distributeMoney(roundResults);
           this.revealCards(winningData.filter((a) => a.winner));
         } else {
-          this.log("This stage of the round is INVALID!!");
+          this.log('This stage of the round is INVALID!!');
         }
       }
     } else {
-      this.log("stage not complete");
+      this.log('stage not complete');
       //check if everyone folded except one player
       const [numNonFolds, nonFolderPlayer] = this.getNonFoldedPlayer();
       if (!handOver && numNonFolds == 1) {
         // everyone folded, start new round, give pot to player
-        this.log("everyone folded except one");
+        this.log('everyone folded except one');
         nonFolderPlayer.money = this.getCurrentPot() + nonFolderPlayer.money;
         this.endHandAllFold(nonFolderPlayer.getUsername());
         handOver = true;
       } else {
         let currTurnIndex = 0;
         //check if move just made was a fold
-        if (this.lastMoveParsed.move == "Fold") {
+        if (this.lastMoveParsed.move == 'Fold') {
           currTurnIndex = this.players.findIndex(
             (p) => p === this.lastMoveParsed.player
           );
-          this.lastMoveParsed = { move: "", player: "" };
+          this.lastMoveParsed = { move: '', player: '' };
         } else {
           currTurnIndex = this.players.findIndex(
-            (p) => p.getStatus() === "Their Turn"
+            (p) => p.getStatus() === 'Their Turn'
           );
-          this.players[currTurnIndex].setStatus("");
+          this.players[currTurnIndex].setStatus('');
         }
         do {
           currTurnIndex =
             currTurnIndex - 1 < 0 ? this.players.length - 1 : currTurnIndex - 1;
         } while (
-          this.players[currTurnIndex].getStatus() == "Fold" ||
+          this.players[currTurnIndex].getStatus() == 'Fold' ||
           this.players[currTurnIndex].allIn
         );
-        this.players[currTurnIndex].setStatus("Their Turn");
+        this.players[currTurnIndex].setStatus('Their Turn');
       }
     }
     if (!handOver) {
-      this.log("RERENDERING");
+      this.log('RERENDERING');
       this.rerender();
     }
   };
@@ -407,8 +407,8 @@ const Game = function (name, host) {
     for (let j = 0; j < stageData.length; j++) {
       if (
         stageData[j].player == player.getUsername() &&
-        stageData[j].bet != "Buy-in" &&
-        stageData[j].bet != "Fold"
+        stageData[j].bet != 'Buy-in' &&
+        stageData[j].bet != 'Fold'
       )
         totalBetInStage += stageData[j].bet;
     }
@@ -426,7 +426,7 @@ const Game = function (name, host) {
     let totalBetInStage = 0;
 
     for (let j = 0; j < stageData.length; j++) {
-      if (stageData[j].bet != "Buy-in" && stageData[j].bet != "Fold")
+      if (stageData[j].bet != 'Buy-in' && stageData[j].bet != 'Fold')
         totalBetInStage += stageData[j].bet;
     }
     return totalBetInStage;
@@ -482,7 +482,7 @@ const Game = function (name, host) {
         originalInvested: invested,
         handStrength: winData ? winData.rank : -1,
         result: -invested,
-        live: p.getStatus() !== "Fold",
+        live: p.getStatus() !== 'Fold',
         winner: false,
         gain: 0,
       };
@@ -504,7 +504,7 @@ const Game = function (name, host) {
     let handArray = [];
     let playerArray = [];
     for (let i = 0; i < this.players.length; i++) {
-      if (this.players[i].getStatus() != "Fold") {
+      if (this.players[i].getStatus() != 'Fold') {
         let h = Hand.solve(
           this.convertCardsFormat(this.players[i].cards.concat(this.community))
         );
@@ -518,7 +518,7 @@ const Game = function (name, host) {
     if (Array.isArray(winners)) {
       for (winner of winners) {
         for (playerHand of playerArray) {
-          let winnerArray = winner.toString().split(", ");
+          let winnerArray = winner.toString().split(', ');
           if (
             this.arraysEqual(playerHand.hand.cards.sort(), winnerArray.sort())
           ) {
@@ -532,7 +532,7 @@ const Game = function (name, host) {
         }
       }
     } else {
-      this.log("fatal error: winner cannot be calculated");
+      this.log('fatal error: winner cannot be calculated');
     }
     const res = { winnerData: winnerData, playersData: playerArray };
     return res;
@@ -552,25 +552,25 @@ const Game = function (name, host) {
   this.convertCardsFormat = (arr) => {
     let res = [];
     for (let i = 0; i < arr.length; i++) {
-      let str = "";
+      let str = '';
       let value = arr[i].getValue();
       let suit = arr[i].getSuit();
       if (value == 10) {
-        str += "T";
+        str += 'T';
       } else {
         str += value.toString();
       }
-      if (suit == "♠") str += "s";
-      else if (suit == "♥") str += "h";
-      else if (suit == "♦") str += "d";
-      else if (suit == "♣") str += "c";
+      if (suit == '♠') str += 's';
+      else if (suit == '♥') str += 'h';
+      else if (suit == '♦') str += 'd';
+      else if (suit == '♣') str += 'c';
       res.push(str);
     }
     return res;
   };
 
   this.endHandAllFold = (username) => {
-    this.log("endhandallfold" + this.players);
+    this.log('endhandallfold' + this.players);
     this.roundInProgress = false;
     let cardData = [];
     for (let i = 0; i < this.players.length; i++) {
@@ -581,9 +581,9 @@ const Game = function (name, host) {
       });
     }
     for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-      this.players[pn].emit("endHand", {
+      this.players[pn].emit('endHand', {
         winner: username,
-        folded: this.players[pn].getUsername() != username ? "Fold" : "",
+        folded: this.players[pn].getUsername() != username ? 'Fold' : '',
         username: this.players[pn].getUsername(),
         pot: this.getCurrentPot(),
         money: this.players[pn].getMoney(),
@@ -594,7 +594,7 @@ const Game = function (name, host) {
   };
 
   this.revealCards = (winners) => {
-    this.log("revealllllll");
+    this.log('revealllllll');
     this.roundInProgress = false;
     let cardData = [];
     for (let i = 0; i < this.players.length; i++) {
@@ -603,7 +603,7 @@ const Game = function (name, host) {
         username: this.players[i].getUsername(),
         cards: this.players[i].cards,
         hand: this.players[i].getStatus(),
-        folded: this.players[i].getStatus() == "Fold",
+        folded: this.players[i].getStatus() == 'Fold',
         money: this.players[i].getMoney(),
         buyIns: this.players[i].buyIns,
         gain: winData ? winData.gain : null,
@@ -613,7 +613,7 @@ const Game = function (name, host) {
       .map((a) => a.player.getUsername())
       .toString();
     for (let pn = 0; pn < this.getNumPlayers(); pn++) {
-      this.players[pn].emit("reveal", {
+      this.players[pn].emit('reveal', {
         username: this.players[pn].getUsername(),
         money: this.players[pn].getMoney(),
         cards: cardData,
@@ -627,7 +627,7 @@ const Game = function (name, host) {
   this.allPlayersAllIn = () => {
     let participatingPlayers = 0;
     for (player of this.players) {
-      if (!player.allIn && player.getStatus() != "Fold") participatingPlayers++;
+      if (!player.allIn && player.getStatus() != 'Fold') participatingPlayers++;
     }
     return participatingPlayers <= 1;
   };
@@ -636,23 +636,23 @@ const Game = function (name, host) {
     let allPlayersPresent = false;
     let numUnfolded = 0;
     for (let i = 0; i < this.players.length; i++) {
-      if (this.players[i].status != "Fold" && !this.players[i].allIn)
+      if (this.players[i].status != 'Fold' && !this.players[i].allIn)
         numUnfolded++;
     }
     const currRound = this.getCurrentRoundBets();
     if (this.roundData.bets.length == 1) {
       allPlayersPresent =
-        currRound.filter((a) => a.bet != "Fold").length >= numUnfolded &&
+        currRound.filter((a) => a.bet != 'Fold').length >= numUnfolded &&
         this.bigBlindWent;
     } else {
       allPlayersPresent =
-        currRound.filter((a) => a.bet != "Fold").length >= numUnfolded;
+        currRound.filter((a) => a.bet != 'Fold').length >= numUnfolded;
     }
-    this.log("all players present " + allPlayersPresent);
+    this.log('all players present ' + allPlayersPresent);
     let allPlayersCall = true;
     for (player of this.players) {
       if (
-        player.getStatus() != "Fold" &&
+        player.getStatus() != 'Fold' &&
         this.getPlayerBetInStage(player) != this.getCurrentTopBet() &&
         !player.allIn
       ) {
@@ -660,7 +660,7 @@ const Game = function (name, host) {
         break;
       }
     }
-    this.log("all players call " + allPlayersCall);
+    this.log('all players call ' + allPlayersCall);
     return allPlayersPresent && allPlayersCall;
   };
 
@@ -694,7 +694,7 @@ const Game = function (name, host) {
 
   this.startGame = () => {
     this.dealCards();
-    this.emitPlayers("startGame", {
+    this.emitPlayers('startGame', {
       players: this.players.map((p) => {
         return p.username;
       }),
@@ -720,7 +720,7 @@ const Game = function (name, host) {
         return a.compare(b);
       });
 
-      this.players[pn].emit("dealt", {
+      this.players[pn].emit('dealt', {
         currBet: this.getCurrentTopBet(),
         username: this.players[pn].getUsername(),
         cards: this.players[pn].cards,
@@ -748,7 +748,7 @@ const Game = function (name, host) {
 
   this.disconnectPlayer = (player) => {
     this.disconnectedPlayers.push(player);
-    if (player.getStatus() == "Their Turn") {
+    if (player.getStatus() == 'Their Turn') {
       this.moveOntoNextPlayer();
     }
     this.players = this.players.filter((a) => a !== player);
@@ -757,18 +757,18 @@ const Game = function (name, host) {
         this.host = this.players[0].getUsername();
       }
     }
-    this.emitPlayers("playerDisconnected", { player: player.getUsername() });
-    this.emitPlayers("joinRoomUpdate", {
+    this.emitPlayers('playerDisconnected', { player: player.getUsername() });
+    this.emitPlayers('joinRoomUpdate', {
       players: this.getPlayersArray(),
       code: this.getCode(),
     });
-    this.emitPlayers("hostRoomUpdate", { players: this.getPlayersArray() });
+    this.emitPlayers('hostRoomUpdate', { players: this.getPlayersArray() });
     this.rerender();
   };
 
   this.checkBigBlindWent = (socket) => {
     if (
-      this.findPlayer(socket.id).blindValue == "Big Blind" &&
+      this.findPlayer(socket.id).blindValue == 'Big Blind' &&
       this.roundData.bets.length == 1
     ) {
       this.bigBlindWent = true;
@@ -791,10 +791,10 @@ const Game = function (name, host) {
     let roundDataStage = this.getCurrentRoundBets().find(
       (a) => a.player == player.getUsername()
     );
-    if (roundDataStage != undefined && roundDataStage.bet != "Fold") {
+    if (roundDataStage != undefined && roundDataStage.bet != 'Fold') {
       preFoldBetAmount += roundDataStage.bet;
     }
-    player.setStatus("Fold");
+    player.setStatus('Fold');
     this.foldPot = this.foldPot + preFoldBetAmount;
     if (
       this.getCurrentRoundBets().some((a) => a.player == player.getUsername())
@@ -802,17 +802,17 @@ const Game = function (name, host) {
       this.setCurrentRoundBets(
         this.getCurrentRoundBets().map((a) =>
           a.player == player.getUsername()
-            ? { player: player.getUsername(), bet: "Fold" }
+            ? { player: player.getUsername(), bet: 'Fold' }
             : a
         )
       );
     } else {
       this.getCurrentRoundBets().push({
         player: player.getUsername(),
-        bet: "Fold",
+        bet: 'Fold',
       });
     }
-    this.lastMoveParsed = { move: "Fold", player: player };
+    this.lastMoveParsed = { move: 'Fold', player: player };
     this.moveOntoNextPlayer();
     return true;
   };
@@ -895,7 +895,7 @@ const Game = function (name, host) {
         }
         return true;
       } else {
-        this.log("this should not happen");
+        this.log('this should not happen');
       }
     }
   };
@@ -993,33 +993,33 @@ const Game = function (name, host) {
     const playerBet = this.getPlayerBetInStage(player);
     const topBet = this.getCurrentTopBet();
     let possibleMoves = {
-      fold: "yes",
-      check: "yes",
-      bet: "yes",
+      fold: 'yes',
+      check: 'yes',
+      bet: 'yes',
       call: topBet,
-      raise: "yes",
+      raise: 'yes',
     };
-    if (player.getStatus() == "Fold") {
-      this.log("Error: Folded players should not be able to move.");
+    if (player.getStatus() == 'Fold') {
+      this.log('Error: Folded players should not be able to move.');
     }
     if (topBet != 0) {
-      possibleMoves.bet = "no";
-      possibleMoves.check = "no";
+      possibleMoves.bet = 'no';
+      possibleMoves.check = 'no';
       if (
-        player.blindValue == "Big Blind" &&
+        player.blindValue == 'Big Blind' &&
         !this.bigBlindWent &&
         topBet == this.bigBlind
       )
-        possibleMoves.check = "yes";
+        possibleMoves.check = 'yes';
     } else {
-      possibleMoves.raise = "no";
+      possibleMoves.raise = 'no';
     }
     if (topBet <= playerBet) {
-      possibleMoves.call = "no";
+      possibleMoves.call = 'no';
     }
     if (topBet >= player.getMoney() + playerBet) {
-      possibleMoves.raise = "no";
-      possibleMoves.call = "all-in";
+      possibleMoves.raise = 'no';
+      possibleMoves.call = 'all-in';
     }
     return possibleMoves;
   };
