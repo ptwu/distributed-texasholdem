@@ -516,8 +516,8 @@ const Game = function (name, host) {
 
     let winnerData = [];
     if (Array.isArray(winners)) {
-      for (winner of winners) {
-        for (playerHand of playerArray) {
+      for (playerHand of playerArray) {
+        for (winner of winners) {
           let winnerArray = winner.toString().split(', ');
           if (
             this.arraysEqual(playerHand.hand.cards.sort(), winnerArray.sort())
