@@ -378,12 +378,14 @@ const Game = function (name, host) {
           );
           this.players[currTurnIndex].setStatus('');
         }
+        let count = 0;
         do {
-          currTurnIndex =
-            currTurnIndex - 1 < 0 ? this.players.length - 1 : currTurnIndex - 1;
+          currTurnIndex = currTurnIndex - 1 < 0 ? this.players.length - 1 : currTurnIndex - 1;
+          count ++;
         } while (
-          this.players[currTurnIndex].getStatus() == 'Fold' ||
-          this.players[currTurnIndex].allIn
+          (this.players[currTurnIndex].getStatus() == 'Fold'
+          || this.players[currTurnIndex].allIn)
+          && count < Object.keys(this.players).length * 2 // Avoid infinite loop, allow search twice on all players
         );
         this.players[currTurnIndex].setStatus('Their Turn');
       }
