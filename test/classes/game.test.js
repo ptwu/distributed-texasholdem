@@ -808,3 +808,81 @@ test('Test _distributeMoney', () => {
   expect(players[3].result).toBe(90);
   expect(players[4].result).toBe(920);
 });
+
+
+
+test('Test infinite loop issue', () => {
+  // Log data retreive before infinite loop crash
+  const playersData = [{
+    "username": "$2a$11$sN3yXEe38GKcnCfxIO2GCe8/rGoSkZ5AtWba6p1cq5NQXQ4HZUYPS",
+    "cards": [{
+      "value": "A",
+      "suit": "♣"
+    }, {
+      "value": 3,
+      "suit": "♠"
+    }],
+    "money": 5,
+  }, {
+    "username": "$2a$11$Um0VU8I.gNaKNi6LeFFUG.n7yvlTcCd0CNIozbfofFoP82IcMmri2",
+    "cards": [{
+      "value": "Q",
+      "suit": "♠"
+    }, {
+      "value": 2,
+      "suit": "♣"
+    }],
+    "money": 5,
+  }, {
+    "username": "$2a$11$EFSkbqmMr9.xSzEWOWXcEuu85NypJpg3XUdMrT3oO1FmMjB1wF4JO",
+    "cards": [{
+      "value": 10,
+      "suit": "♥"
+    }, {
+      "value": "A",
+      "suit": "♥"
+    }],
+    "money": 5,
+  }];
+
+  const game = new Game('best-game', '1');
+  game.smallBlind = 5;
+  game.bigBlind = 10;
+
+  // Mock socket
+  const sockets = [];
+  const players = [];
+  for (const pl of playersData) {
+    const sock = new events.EventEmitter();
+    sock.id = pl.username;
+    sockets.push(sock);
+
+    const p = game.addPlayer(pl.username, sock);
+    p.money = pl.money;
+    players.push(p);
+  }
+
+  expect(game.players.length).toBe(playersData.length);
+
+  expect(game.roundNum).toBe(0);
+  expect(game.roundData.bets.length).toBe(0);
+
+  game.startGame();
+
+  for (const [index, pl] of Object.entries(playersData)) {
+    const p = players[Number(index)];
+    p.cards = [...pl.cards];
+  }
+
+  expect(game.roundNum).toBe(1);
+  expect(game.roundData.bets.length).toBeGreaterThan(0);
+
+  let currentPlayer;
+
+  // Pre-Flop
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true);
+
+  currentPlayer = game.players.filter((p) => p.status === 'Their Turn')[0];
+  expect(game.call(currentPlayer.socket)).toBe(true); // This call made an infinite loop
+});
