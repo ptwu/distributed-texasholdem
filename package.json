@@ -19,10 +19,6 @@
     "pokersolver": "^2.1.3",
     "socket.io": "^2.3.0"
   },
-  "engines": {
-    "node": "^10.16",
-    "yarn": "^1.19"
-  },
   "devDependencies": {
     "jest": "^26.0.1"
   }
