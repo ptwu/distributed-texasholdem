@@ -3,7 +3,8 @@
 ![1.0.0](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![CI](https://github.com/ptwu/distributed-texasholdem/workflows/CI/badge.svg)
 
-Play at https://poker.peterlwu.com. Note that the site has to cold start because I'm a college student who doesn't want to pay for more dynos on Heroku.
+Play at https://distributed-texasholdem.onrender.com. Note that the site has to cold start because I'm a 
+college student who doesn't want to pay for anything beyond the free plan.
 
 Using `socket.io`, `Node.js`, and `express` to make a distributed poker game. Allows for multiple
 gameplay rooms simultaneously across different devices.
