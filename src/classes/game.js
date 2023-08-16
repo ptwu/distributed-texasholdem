@@ -257,6 +257,7 @@ const Game = function (name, host) {
 
   this.findFirstToGoPlayer = () => {
     if (
+      !this.players[this.roundData.smallBlind] ||
       this.players[this.roundData.smallBlind].getStatus() == 'Fold' ||
       this.players[this.roundData.smallBlind].allIn
     ) {
